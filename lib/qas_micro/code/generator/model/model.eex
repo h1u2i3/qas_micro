@@ -1,7 +1,5 @@
 defmodule <%= model_module %> do
   use <%= model_plugin_module %>
 
-<%= if model_extension do %>
-  <%= model_extension %>
-<% end %>
+  # Write your own hooks for specific handler
 end

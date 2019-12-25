@@ -1,5 +1,5 @@
-```
 @name(account)
+@database_name(account)
 @server(yimei-account.openfaas-fn.svc.cluster.local)
 @port(8080)
 
@@ -61,4 +61,3 @@ object do
     +json(permission_setting)
   end
 end
-```

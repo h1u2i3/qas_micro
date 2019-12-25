@@ -44,29 +44,6 @@ defmodule <%= model_plugin_module %> do
       <%= status_changeset_method %>
     <% end %>
 
-    <%= if wechat_auth do %>
-      def wechat_create_changeset(struct, params \\ %{}, _role \\ :visitor) do<%= if password do %>
-        needed_fields = [:wechat_digest | @create_fields] -- @password_fields<% else %>
-        needed_fields = [:wechat_digest | @create_fields]<% end %>
-
-        %{openid: openid, nickname: nickname, headimgurl: headimgurl} = params
-
-        cast_params =
-          params
-          |> Map.put(:wechat_digest, openid)
-          |> Map.put(:name, nickname)
-      <%= if field = config_module.field(object_name) |> Enum.find(&(&1.name == "avatar")) do %>
-        <%= if field.type == "file" do %>
-          |> Map.put(:avatar, %{key: "random", url: headimgurl})
-        <% else %>
-          |> Map.put(:avatar, headimgurl)
-        <% end %>
-      <% end %>
-
-        Ecto.Changeset.cast(struct, cast_params, needed_fields)
-      end
-    <% end %>
-
       def update_changeset(struct, params \\ %{}, _role \\ :visitor) do
         struct
         |> Ecto.Changeset.change()
@@ -122,113 +99,6 @@ defmodule <%= model_plugin_module %> do
     <% end %>
 
     <%= if auth do %>
-      <%= if wechat_miniapp_auth do %>
-      def wechat_miniapp_auth(%{code: code, info: info}) do
-        with {:ok, result} <- Wechat.Auth.miniapp_info(code, %{api: <%= wechat_module %>}),
-            {:ok, user} <- find_or_create_with_wechat_miniapp_info(result, info),
-            {:ok, token, _claims} <- <%= guardian_module_name %>.encode_and_sign(user, %{}, token_type: "token") do
-          {:ok, %{token: token, <%= object_name %>: user}}
-        else
-          {:error, reason} ->
-            {:ok, %{error: %{key: :unauthorized, message: reason}}}
-        end
-      end
-
-      defp find_or_create_with_wechat_miniapp_info(result, info) do
-        %{openid: openid} = result
-        user = Repo.get_by(<%= model_module %>, wechat_digest: openid)
-
-        case user do
-          nil ->
-            new()
-            |> wechat_create_changeset(info)
-            |> Repo.insert
-            |> case do
-              {:ok, user} ->
-                <%= config_module %>.callback_module().on_event("<%= object_name %>_created", user)
-                {:ok, user}
-
-              {:error, changeset} ->
-                {:error, changeset}
-            end
-
-          _ ->
-          {:ok, user}
-        end
-      end
-      <% end %>
-      <%= if wechat_auth do %>
-      def wechat_auth(%{code: code}) do
-        with {:ok, user_info} <- Wechat.Auth.info(code, %{api: <%= wechat_module %>, scope: "snsapi_userinfo"}),
-            {:ok, user} <- find_or_create_with_wechat_info(user_info),
-            {:ok, token, _claims} <- <%= guardian_module_name %>.encode_and_sign(user, %{}, token_type: "token") do
-          {:ok, %{token: token, <%= object_name %>: user}}
-        else
-          {:error, reason} ->
-            {:ok, %{error: %{key: :unauthorized, message: reason}}}
-        end
-      end
-
-      defp find_or_create_with_wechat_info(info) do
-        %{openid: openid} = info
-        user = Repo.get_by(<%= model_module %>, wechat_digest: openid)
-
-        case user do
-          nil ->
-            new()
-            |> wechat_create_changeset(info)
-            |> Repo.insert
-            |> case do
-              {:ok, user} ->
-                <%= config_module %>.callback_module().on_event("<%= object_name %>_created", user)
-                {:ok, user}
-
-              {:error, changeset} ->
-                {:error, changeset}
-            end
-
-          _ ->
-          {:ok, user}
-        end
-      end
-      <% end %>
-
-      <%= if sms_auth do %>
-      def sms_auth(input) do
-        {code, cast_input} = Map.pop(input, :code)
-
-        cellphone =
-          cast_input
-          |> Map.values
-          |> List.first
-
-        if QasMicro.Sms.verify("<%= application_name %>", cellphone, code) do
-          with {:ok, user} <- find_or_create_with_cellphone(cast_input),
-               {:ok, token, _claims} <- <%= guardian_module_name %>.encode_and_sign(user, %{}, token_type: "token") do
-            {:ok, %{token: token, <%= object_name %>: user}}
-          else
-            {:error, reason} ->
-              {:ok, %{error: %{key: :code, message: reason}}}
-          end
-        else
-          {:ok, %{error: %{key: :code, message: "base sms code"}}}
-        end
-      end
-      <% end %>
-
-      <%= if cellphone_auth do %>
-      def cellphone_auth(input) do
-        with {:ok, user} <- find_or_create_with_cellphone(input),
-              {:ok, token, _claims} <- <%= guardian_module_name %>.encode_and_sign(user, %{}, token_type: "token") do
-          {:ok, %{token: token, <%= object_name %>: user}}
-        else
-          {:error, reason} ->
-            {:ok, %{error: %{key: :code, message: reason}}}
-        end
-      end
-      <% end %>
-
-      <%= if normal_auth do %>
       def auth(input) do
         with {:ok, user} <- sign_in(input),
              {:ok, token, _claims} <- <%= guardian_module_name %>.encode_and_sign(user, %{}, token_type: "token") do
@@ -238,7 +108,6 @@ defmodule <%= model_plugin_module %> do
             {:ok, %{error: %{key: :unauthorized, message: reason}}}
         end
       end
-      <% end %>
 
       defp sign_in(input) do
         {password, cast_input} = Map.pop(input, :password)
@@ -303,39 +172,6 @@ defmodule <%= model_plugin_module %> do
       def update_fields do
         <%= update_fields %>
       end
-
-      def create_input_fields(role) do
-        role_create_input_fields(create_fields(), role)
-      end
-
-      def update_input_fields(role) do
-        role_update_input_fields(update_fields(), role)
-      end
-
-      def output_forbidden_fields(role) do
-        role_output_forbidden_fields(role)
-      end
-
-      # dataloader
-      def data() do
-        Dataloader.Ecto.new(Repo, query: &query/2, run_batch: &run_batch/5)
-      end
-
-      def run_batch(queryable, query, col, inputs, repo_opts) do
-        Dataloader.Ecto.run_batch(Repo, queryable, query, col, inputs, repo_opts)
-      end
-
-    <%= for relation <- relation_query_functions do %>
-      <%= relation %>
-    <% end %>
-
-      def query(queryable, _) do
-        queryable
-      end
-
-    <%= for fetch_way <- fetch_way_functions do %>
-      <%= fetch_way %>
-    <% end %>
 
       defoverridable Module.definitions_in(__MODULE__, :def)
     end

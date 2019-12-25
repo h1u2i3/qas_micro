@@ -22,10 +22,10 @@ defmodule QasMicro.Code.Generator.Model.Field do
       &filter_with_relation_field(&1, schema_names, schema_targets, schema_foreign_keys)
     )
     |> Kernel.++(Map.get(object, :schema, []))
-    |> Kernel.++([
-      %{name: "row_number", type: "integer", virtual: true},
-      %{name: "through_key", type: "string", virtual: true}
-    ])
+    # |> Kernel.++([
+    #   %{name: "row_number", type: "integer", virtual: true},
+    #   %{name: "through_key", type: "string", virtual: true}
+    # ])
     |> Enum.map(&render_single/1)
     |> Enum.filter(& &1)
   end

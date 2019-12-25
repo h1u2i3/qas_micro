@@ -7,14 +7,12 @@ defmodule QasMicro.Code.Generator.Model.Plugin do
         config_module,
         object_name,
         model_module,
-        model_plugin_module,
-        model_extension
+        model_plugin_module
       ) do
     eex_template_string()
     |> EEx.eval_string(
       model_module: model_module,
-      model_plugin_module: model_plugin_module,
-      model_extension: model_extension
+      model_plugin_module: model_plugin_module
     )
     |> config_module.save_file("#{object_name}.ex", "model")
   end

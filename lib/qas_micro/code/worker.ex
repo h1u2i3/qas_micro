@@ -3,9 +3,8 @@ defmodule QasMicro.Code.Worker do
   alias QasCore.Code.Server
   alias QasCore.Code.Middleware.CodeClean
 
-  alias QasMicro.Code.Middleware.{Database, Model}
-
   alias QasMicro.Config.Worker, as: ConfigWorker
+  alias QasMicro.Code.Middleware.{Database, Model}
 
   @middlewares [CodeClean, Database, Model]
 

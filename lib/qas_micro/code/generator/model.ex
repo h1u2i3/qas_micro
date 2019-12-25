@@ -11,7 +11,7 @@ defmodule QasMicro.Code.Generator.Model do
 
   def render(config_module, object) do
     object_name = object.name
-    table_name = object.table_name
+    table_name = Map.get(object, :table_name, Inflex.pluralize(object_name))
     timestamp = Map.get(object, :timestamp, true)
 
     application_name = config_module.name()
@@ -25,11 +25,6 @@ defmodule QasMicro.Code.Generator.Model do
     field_schema = QasMicro.Code.Generator.Model.Field.render(object)
     relation_schema = QasMicro.Code.Generator.Model.Relation.render(config_module, object)
     validations = QasMicro.Code.Generator.Model.Validation.render(object)
-
-    relation_query_functions =
-      QasMicro.Code.Generator.Model.Dataloader.render(config_module, object)
-
-    fetch_way_functions = QasMicro.Code.Generator.Model.FetchWay.render(config_module, object)
 
     all_fields = all_fields(object)
     create_fields = create_fields(object)
@@ -87,21 +82,9 @@ defmodule QasMicro.Code.Generator.Model do
       cellphone_auth: cellphone_auth,
       sms_auth: sms_auth,
       polymorphic: polymorphic,
-      geometry: geometry,
-      # dataloader
-      relation_query_functions: relation_query_functions,
-      # fetch_way
-      fetch_way_functions: fetch_way_functions
+      geometry: geometry
     )
     |> config_module.save_file("#{object_name}.ex", "plugin/model")
-
-    QasMicro.Code.Generator.Model.Plugin.render(
-      config_module,
-      object_name,
-      model_module,
-      model_plugin_module,
-      model_extension
-    )
   end
 
   defp status_changeset_methods(object) do

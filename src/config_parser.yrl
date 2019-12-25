@@ -1,43 +1,42 @@
 Nonterminals
   grammer
-  object_blocks object_block object_items object_item service_items service_item
-  field_block schema_block validation_block permission_block global_block
-  seed_blocks seed_block text_content service_blocks service_block
-  query_blocks query_block mutation_blocks mutation_block type_blocks type_block input_type_blocks input_type_block
-  type_attrs type_attr
+  object_blocks object_block object_items object_item % service_items service_item
+  field_block schema_block validation_block permission_block
+  seed_blocks seed_block text_content % service_blocks service_block
+  query_blocks query_block mutation_blocks mutation_block type_blocks
+  type_block input_type_blocks input_type_block type_attrs
   extension_block plus_attrs plus_attr attrs attr content code_content.
   % wechat_block callback_block setting_block worker_block
+  % global_block
 
 Terminals
   '(' ')' do_exp end_exp
   section_object section_schema section_field section_validation section_permission
   section_query section_mutation section_type section_input_type
-  section_seed section_extension section_global section_service
+  section_seed section_extension % section_global section_service
   pos_attr neg_attr add_attr string text code.
   % section_wechat section_callback section_worker section_setting
 
 Rootsymbol grammer.
 
-grammer -> attrs                  : '$1'.
-grammer -> grammer service_blocks : [{'service', '$2'}|'$1'].
-grammer -> grammer global_block   : [{'global', '$2'}|'$1'].
+grammer -> attrs                                          : '$1'.
+grammer -> grammer object_blocks                          : [{'object', '$2'}|'$1'].
 
+% grammer -> grammer global_block   : [{'global', '$2'}|'$1'].
 % grammer -> grammer wechat_block                           : [{'wechat', '$2'}|'$1'].
 % grammer -> grammer worker_block                           : [{'worker', '$2'}|'$1'].
 % grammer -> grammer setting_block                          : [{'setting', '$2'}|'$1'].
 % grammer -> grammer callback_block                         : [{'callback', '$2'}|'$1'].
-% grammer -> grammer object_blocks                          : [{'object', '$2'}|'$1'].
-% wechat_block  -> section_wechat do_exp attrs end_exp      : '$3'.
+% grammer -> grammer service_blocks : [{'service', '$2'}|'$1'].
 
-service_blocks -> service_block                                 : ['$1'].
-service_blocks -> service_block service_blocks                  : concat_results('$1', '$2').
-service_block  -> section_service do_exp service_items end_exp  : '$3'.
+% service_blocks -> service_block                                 : ['$1'].
+% service_blocks -> service_block service_blocks                  : concat_results('$1', '$2').
+% service_block  -> section_service do_exp service_items end_exp  : '$3'.
 
-service_items  -> service_item                : '$1'.
-service_items  -> service_item service_items  : concat_results('$1', '$2').
-service_item   -> object_blocks               : {'object', '$1'}.
-service_item   -> attr                        : '$1'.
-
+% service_items  -> service_item                : '$1'.
+% service_items  -> service_item service_items  : concat_results('$1', '$2').
+% service_item   -> object_blocks               : {'object', '$1'}.
+% service_item   -> attr                        : '$1'.
 
 object_blocks -> object_block                               : ['$1'].
 object_blocks -> object_block object_blocks                 : concat_results('$1', '$2').
@@ -51,25 +50,26 @@ object_item   -> query_blocks             : {'query', '$1'}.
 object_item   -> mutation_blocks          : {'mutation', '$1'}.
 object_item   -> type_blocks              : {'type', '$1'}.
 object_item   -> input_type_blocks        : {'input_type', '$1'}.
-% object_item   -> schema_block             : '$1'.
-% object_item   -> validation_block         : '$1'.
-% object_item   -> permission_block         : '$1'.
-% object_item   -> extension_block          : '$1'.
-% object_item   -> seed_blocks              : {'seed', '$1'}.
+object_item   -> schema_block             : '$1'.
+object_item   -> validation_block         : '$1'.
+object_item   -> permission_block         : '$1'.
+object_item   -> extension_block          : '$1'.
+object_item   -> seed_blocks              : {'seed', '$1'}.
 
 field_block       -> section_field do_exp plus_attrs end_exp          : {'field', '$3'}.
 schema_block      -> section_schema do_exp plus_attrs end_exp         : {'schema', '$3'}.
 validation_block  -> section_validation do_exp plus_attrs end_exp     : {'validation', '$3'}.
 permission_block  -> section_permission do_exp attrs end_exp          : {'permission', '$3'}.
 extension_block   -> section_extension do_exp attrs end_exp           : {'extension', '$3'}.
-global_block      -> section_global do_exp code_content end_exp       : '$3'.
+% global_block      -> section_global do_exp code_content end_exp       : '$3'.
 % worker_block      -> section_worker do_exp attrs end_exp            : '$3'.
+% wechat_block      -> section_wechat do_exp attrs end_exp            : '$3'.
 % setting_block     -> section_setting do_exp attrs end_exp           : '$3'.
 % callback_block    -> section_callback do_exp code_content end_exp   : '$3'.
 
-% seed_blocks       -> seed_block                           : ['$1'].
-% seed_blocks       -> seed_block seed_blocks               : concat_results('$1', '$2').
-% seed_block        -> section_seed do_exp attrs end_exp    : '$3'.
+seed_blocks       -> seed_block                           : ['$1'].
+seed_blocks       -> seed_block seed_blocks               : concat_results('$1', '$2').
+seed_block        -> section_seed do_exp attrs end_exp    : '$3'.
 
 query_blocks       -> query_block                                   : ['$1'].
 query_blocks       -> query_block query_blocks                      : concat_results('$1', '$2').
