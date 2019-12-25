@@ -1,0 +1,3 @@
+defmodule <%= worker_module_name %> do
+  <%= worker_code %>
+end

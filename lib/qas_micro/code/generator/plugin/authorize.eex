@@ -1,0 +1,40 @@
+defmodule <%= authorize_module_name %> do
+  @behaviour Absinthe.Middleware
+
+  alias QasMicro.Util.Map, as: QMap
+
+  def call(resolution, {model, action}) do
+    with %{role: role, current_user: current_user} <- resolution.context,
+      true <- correct_role?(current_user, role, {model, action}) do
+      resolution
+    else
+      _ -> Absinthe.Resolution.put_result(resolution, {:error, "unauthorized"})
+    end
+  end
+
+  def correct_role?(current_user, role, {model, action}) do
+    case action do
+      :all ->
+        true
+
+      _ ->
+        case current_user do
+        <%= for resource <- auth_module_names do %>
+          %<%= resource %>{} ->
+            <%= config_module %>.permission(model)
+            |> QMap.get(:"<%= QasMicro.Util.Helper.model_name_from_module(resource) %>.#{action}", %{})
+            |> Map.keys()
+            |> Enum.member?(role)
+        <% end %>
+          nil ->
+            <%= config_module %>.permission(model)
+            |> QMap.get(:"<%= config_module.authorize_fallback() %>.#{action}", %{})
+            |> Map.keys()
+            |> Enum.member?(role)
+
+          _ ->
+            false
+        end
+    end
+  end
+end

@@ -17,7 +17,7 @@ defmodule QasMicro.MixProject do
   def application do
     [
       extra_applications: [:logger],
-      mod: {QasMicro, []}
+      mod: {QasMicro.Application, []}
     ]
   end
 

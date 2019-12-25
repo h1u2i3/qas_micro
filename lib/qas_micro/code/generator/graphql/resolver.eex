@@ -1,0 +1,556 @@
+defmodule <%= resolver_module_name %> do
+  import Absinthe.Resolution.Helpers, only: [on_load: 2]
+  import Ecto.Query
+
+  alias <%= repo_module_name %>
+  alias <%= schema_module_name %>
+  alias QasMicro.Util.Unit
+
+  ##################
+  # Action Resolver
+  ##################
+
+  def auth(module) do
+    fn _, %{input: input}, _ ->
+      module.auth(input)
+    end
+  end
+
+  def wechat_auth(module) do
+    fn _, %{input: input}, _ ->
+      module.wechat_auth(input)
+    end
+  end
+
+  def send_sms(module) do
+    fn _, %{cellphone: cellphone}, _ ->
+      if Regex.match?(~r/^1[3|4|5|7|8][0-9]{9}$/, cellphone) do
+        case module.send_sms(cellphone) do
+          {:ok, _} ->
+            {:ok, %{status: :success, message: "message sent"}}
+          {:error, reason} ->
+            {:ok, %{status: :error, message: reason}}
+        end
+      else
+        {:ok, %{status: :error, message: "cellphone format error"}}
+      end
+    end
+  end
+
+  def sms_auth(module) do
+    fn _, %{input: input}, _ ->
+      module.sms_auth(input)
+    end
+  end
+
+  def cellphone_auth(module) do
+    fn _, %{input: input}, _ ->
+      key = input |> Map.keys() |> List.first
+      value = input |> Map.values() |> List.first
+
+      case QasMicro.Jpush.cellphone("<%= application_name %>", value) do
+        {:ok, cellphone} -> module.cellphone_auth(%{key => cellphone})
+        {:error, reason} -> {:ok, %{status: :error, message: reason}}
+      end
+    end
+  end
+
+  def jsapi_params() do
+    fn _, %{url: url}, _ ->
+      {:ok, Wechat.Jsapi.config_params(<%= wechat_api_module_name %>, url: url)}
+    end
+  end
+
+  def status_change(module, field, status) do
+    fn _, %{id: id}, %{context: %{current_user: current_user, role: role}} ->
+      module
+      |> Repo.get(id)
+      |> case do
+        nil ->
+          {:error, %{key: :id, message: "record with id #{id} not found"}}
+        model ->
+          changeset = apply(module, String.to_atom("#{field}_#{status}_changeset"), [model, role])
+          if <%= abilities_module_name %>.can?(role, current_user, :update, changeset) do
+            with :ok <- module.can?(:change_status, changeset, current_user) do
+              case Repo.update(changeset) do
+                {:ok, item} -> {:ok, make_result(module, :after_status_change, item)}
+                {:error, changeset} -> {:error, changeset}
+              end
+            else
+              {:error, reason} ->
+                {:ok, %{errors: [%{key: :base, message: reason}]}}
+            end
+          else
+            {:ok, %{errors: [%{key: :authorize, message: "you have no permission to do this action"}]}}
+          end
+      end
+    end
+  end
+
+  def update_password(module) do
+    fn _, %{input: input}, %{context: %{current_user: current_user, role: role}} ->
+      if current_user do
+        changeset = module.password_changeset(current_user, input, role)
+        if <%= abilities_module_name %>.can?(role, current_user, :update, changeset) do
+          with :ok <- module.can?(:change_password, changeset, current_user) do
+            case Repo.update(changeset) do
+              {:ok, item} -> {:ok, make_result(module, :after_update_password, item)}
+              {:error, changeset} -> {:error, changeset}
+            end
+          else
+            {:error, reason} ->
+              {:ok, %{errors: [%{key: :base, message: reason}]}}
+          end
+        else
+          {:ok, %{errors: [%{key: :authorize, message: "you have no permission to do this action"}]}}
+        end
+      else
+        {:ok, %{errors: [%{key: :authorize, message: "didn't log in"}]}}
+      end
+    end
+  end
+
+  def update_current(module) do
+    fn _, %{input: input}, %{context: %{current_user: current_user, role: role}} = res ->
+      case current_user do
+        nil ->
+          {:error, %{key: :authorize, message: "didn't log in"}}
+        _ ->
+          cast_input = <%= global_module_name %>.input_args(module, input, res)
+          permit_input = update_permited_input(module, role, cast_input)
+          if permit_input == cast_input do
+            current_user
+            |> module.update_changeset(QasMicro.Uploader.process(<%= qiniu_module %>, permit_input), role)
+            |> Repo.update()
+            |> case do
+              {:ok, item} -> {:ok, make_result(module, :after_update_current, item)}
+              {:error, changeset} -> {:error, changeset}
+            end
+          else
+            unallow_attributes = Map.keys(input) -- Map.keys(permit_input)
+            {
+              :ok,
+              %{errors:
+                [%{key: :authorize, message: "you have no permission to modify #{Unit.new(unallow_attributes)}"}]
+              }
+            }
+          end
+      end
+    end
+  end
+
+  def current_user(module) do
+    fn _, _, %{context: %{current_user: current_user}} ->
+      if Map.get(current_user || %{}, :__struct__) == module do
+        {:ok, current_user}
+      else
+        {:error, %{key: :authorize, message: "you didn't have permission to do this action"}}
+      end
+    end
+  end
+
+  def create(module) do
+    fn _, %{input: input}, %{context: %{current_user: current_user, role: role}} = res ->
+      cast_input = <%= global_module_name %>.input_args(module, input, res)
+      permit_input = create_permited_input(module, role, cast_input)
+
+      if permit_input == cast_input do
+        cast_input = <%= global_module_name %>.input_args(module, input, res)
+        changeset = module.create_changeset(module.new(), QasMicro.Uploader.process(<%= qiniu_module %>, cast_input), role)
+
+        if <%= abilities_module_name %>.can?(role, current_user, :create, changeset) do
+          with :ok <- module.can?(:create, changeset, current_user) do
+            case Repo.insert(changeset) do
+              {:ok, item} -> {:ok, make_result(module, :after_create, item)}
+              {:error, changeset} -> {:error, changeset}
+            end
+          else
+            {:error, reason} ->
+              {:ok, %{errors: [%{key: :base, message: reason}]}}
+          end
+        else
+          {:ok, %{errors: [%{key: :authorize, message: "you have no permission to do this action"}]}}
+        end
+      else
+        unallow_attributes = Map.keys(input) -- Map.keys(permit_input)
+        {
+          :ok,
+          %{errors:
+            [%{key: :authorize, message: "you have no permission to create #{Unit.new(unallow_attributes)}"}]
+          }
+        }
+      end
+    end
+  end
+
+  def update(module) do
+    fn _, %{id: id, input: input}, %{context: %{current_user: current_user, role: role}} = res ->
+      module
+      |> Repo.get(id)
+      |> case do
+        nil ->
+          {:error, %{key: :id, message: "record with id #{id} not found"}}
+        item ->
+          cast_input = <%= global_module_name %>.input_args(module, input, res)
+          permit_input = update_permited_input(module, role, cast_input)
+
+          if permit_input == cast_input do
+            changeset = module.update_changeset(item, QasMicro.Uploader.process(<%= qiniu_module %>, permit_input), role)
+            if <%= abilities_module_name %>.can?(role, current_user, :update, changeset) do
+              with :ok <- module.can?(:update, changeset, current_user) do
+                case Repo.update(changeset) do
+                  {:ok, item} -> {:ok, make_result(module, :after_update, item)}
+                  {:error, changeset} -> {:error, changeset}
+                end
+              else
+                {:error, reason} ->
+                  {:ok, %{errors: [%{key: :base, message: reason}]}}
+              end
+            else
+              {:ok, %{errors: [%{key: :authorize, message: "you have no permission to do this action"}]}}
+            end
+          else
+            unallow_attributes = Map.keys(input) -- Map.keys(permit_input)
+            {
+              :ok,
+              %{errors:
+                [%{key: :authorize, message: "you have no permission to modify #{Unit.new(unallow_attributes)}"}]
+              }
+            }
+          end
+      end
+    end
+  end
+
+  def delete(module) do
+    fn _, %{id: id}, %{context: %{current_user: current_user, role: role}} ->
+      module
+      |> Repo.get(id)
+      |> case do
+        nil ->
+          {:ok, %{status: :error, message: "record with id #{id} not found"}}
+        item ->
+          changeset = Ecto.Changeset.change(item)
+
+          if <%= abilities_module_name %>.can?(role, current_user, :delete, changeset) do
+            with :ok <- module.can?(:delete, changeset, current_user) do
+              case Repo.delete(item) do
+                {:ok, _} ->
+                  {:ok, %{status: :success, message: "successfully deleted"}}
+                {:error, _} ->
+                  {:ok, %{status: :error, message: "can't deleted with id #{id}"}}
+              end
+            else
+              {:error, reason} ->
+                {:error, %{key: :base, message: reason}}
+            end
+          else
+            {:error, %{key: :authorize, message: "you have no permission to do this action"}}
+          end
+      end
+    end
+  end
+
+  #################
+  # Query Resolver
+  #################
+
+  def single_query(module) do
+    fn _, %{id: id} = args, %{context: %{current_user: current_user, role: role}} = res ->
+      without_id_args = Map.drop(args, [:id])
+
+      query =
+        apply(
+          Schema,
+          query_name(module),
+          [module.single_args(without_id_args, current_user), res]
+        )
+
+      from(
+        q in subquery(query),
+        where: q.id == ^id
+      )
+      |> Repo.one
+      |> case do
+        nil ->
+          {:error, %{key: :not_found, message: "record with id #{id} not found"}}
+        item ->
+          changeset = Ecto.Changeset.change(item)
+
+          if <%= abilities_module_name %>.can?(role, current_user, :read_one, changeset) do
+            {:ok, permited_output(module, role, item)}
+          else
+            {:error, %{key: :unauthorize, message: "you have no permission to do this action"}}
+          end
+      end
+    end
+  end
+
+  def plural_query(module) do
+    fn _, args, %{context: %{current_user: current_user}} = res ->
+      result =
+        Schema
+        |> apply(
+          query_name(module), [
+            module.plural_args(args, current_user),
+            res
+          ]
+        )
+        |> Repo.all
+
+      {:ok, result}
+    end
+  end
+
+  def wechat_jsapi_params(module) do
+    fn _, %{input: input}, %{context: %{current_user: current_user, client_ip: client_ip}} ->
+      if current_user do
+        out_trade_no = input.out_trade_no
+        model = Repo.get_by(module, unique_number: out_trade_no)
+
+        case model do
+          nil ->
+            {:error, %{key: :unauthrized, message: "you didn't have permission to to this action"}}
+
+          _ ->
+            origin_amount = module.pay_amount(model)
+
+            if origin_amount <= 0 do
+              {:error, %{key: :bad_amount, message: "total_fee should larger than zero"}}
+            else
+              if current_user do
+                origin_params =
+                  input
+                  |> Map.put(:spbill_create_ip, client_ip)
+                  |> Map.put(:openid, current_user.wechat_digest)
+                  |> Map.put(:total_fee, trunc(origin_amount))
+
+                pay_module =
+                  if Code.ensure_compiled?(<%= wechat_pay_module %>) do
+                    <%= wechat_pay_module %>
+                  else
+                    nil
+                  end
+
+                with {:ok, params} <- Payment.Wechat.jsapi_params(pay_module, origin_params) do
+                  {:ok, params}
+                else
+                  {:error, reason} ->
+                    {:error, %{key: :base, message: reason}}
+                end
+              else
+                {:error, %{key: :unauthrized, message: "you didn't have permission to to this action"}}
+              end
+            end
+        end
+      else
+        {:error, %{key: :unauthrized, message: "you didn't have permission to to this action"}}
+      end
+    end
+  end
+
+  def wechat_app_pay_sign(module) do
+    fn _, %{input: input}, %{context: %{current_user: current_user, client_ip: client_ip}} ->
+      out_trade_no = input.out_trade_no
+      model = Repo.get_by(module, unique_number: out_trade_no)
+
+      case model do
+        nil ->
+          {:error, %{key: :unauthrized, message: "you didn't have permission to to this action"}}
+
+        _ ->
+          origin_amount = module.pay_amount(model)
+
+          if origin_amount <= 0 do
+            {:error, %{key: :bad_amount, message: "total_fee should larger than zero"}}
+          else
+            if current_user do
+              origin_params =
+                input
+                |> Map.put(:spbill_create_ip, client_ip)
+                |> Map.put(:trade_type, "APP")
+                |> Map.put(:total_fee, trunc(origin_amount))
+
+              pay_module =
+                if Code.ensure_compiled?(<%= wechat_pay_module %>) do
+                  <%= wechat_pay_module %>
+                else
+                  nil
+                end
+
+              with {:ok, params} <- Payment.Wechat.app_pay_sign(pay_module, origin_params) do
+                {:ok, params}
+              else
+                {:error, reason} ->
+                  {:error, %{key: :base, message: reason}}
+              end
+            else
+              {:error, %{key: :unauthrized, message: "you didn't have permission to to this action"}}
+            end
+          end
+      end
+    end
+  end
+
+  def alipay_app_pay_sign(module) do
+    fn _, %{input: input}, %{context: %{current_user: current_user}} ->
+      out_trade_no = input.out_trade_no
+      model = Repo.get_by(module, unique_number: out_trade_no)
+
+      case model do
+        nil ->
+          {:error, %{key: :unauthrized, message: "you didn't have permission to to this action"}}
+
+        _ ->
+          origin_amount = module.pay_amount(model)
+
+          if origin_amount <= 0 do
+            {:error, %{key: :bad_amount, message: "total_amount should larger than zero"}}
+          else
+            cast_input = Map.put(input, :total_amount, origin_amount / 100)
+
+            pay_module =
+              if Code.ensure_compiled?(<%= alipay_module %>) do
+                <%= alipay_module %>
+              else
+                nil
+              end
+
+            if current_user do
+              with {:ok, params} <- Payment.Alipay.app_pay_sign(pay_module, cast_input) do
+                {:ok, params}
+              else
+                {:error, reason} ->
+                  {:error, %{key: :base, message: reason}}
+              end
+            else
+              {:error, %{key: :unauthrized, message: "you didn't have permission to to this action"}}
+            end
+          end
+      end
+    end
+  end
+
+  def count_query(module) do
+    fn _, args, _ ->
+      query = apply(Schema, query_name(module), [args])
+      {:ok, %{total_count: Repo.one(from(q in subquery(query), select: count()))}}
+    end
+  end
+
+  def relation_query(module, relation, fetch_way) do
+    fn parent, args, %{context: %{loader: loader, current_user: current_user, role: role}} ->
+      if parent do
+        if module.can?(parent, relation, role, current_user) do
+          relation_module =
+            module.new()
+            |> Ecto.assoc(relation)
+            |> Map.get(:from)
+            |> Map.get(:source)
+            |> elem(1)
+
+          case fetch_way do
+            way when is_function(way) ->
+              cast_args = Map.put(args, :qas_fetch_way, :special)
+
+              loader
+              |> Dataloader.load(module, {{:many, {relation, relation_module}}, cast_args}, through_key: way.(parent))
+              |> on_load(fn loader ->
+                result =
+                  Dataloader.get(
+                    loader,
+                    module,
+                    {{:many, {relation, relation_module}}, cast_args},
+                    through_key: way.(parent)
+                  )
+                {:ok, result}
+              end)
+
+            way when way in [:through, :normal] ->
+              if Map.get(args, :pagination) do
+                loader
+                |> Dataloader.load(module, {{:many, {relation, relation_module}}, args}, through_key: parent.id)
+                |> on_load(fn loader ->
+                  result = Dataloader.get(
+                    loader,
+                    module,
+                    {{:many, {relation, relation_module}}, args},
+                    through_key: parent.id
+                  )
+                  {:ok, result}
+                end)
+              else
+                loader
+                |> Dataloader.load(module, {relation, args}, parent)
+                |> on_load(fn loader ->
+                  result = Dataloader.get(loader, module, {relation, args}, parent)
+                  {:ok, result}
+                end)
+              end
+
+            :one_through ->
+              cast_args = Map.put(args, :qas_fetch_way, :one_through)
+              loader
+              |> Dataloader.load(module, {{:one, relation_module}, cast_args}, parent_id: parent.id)
+              |> on_load(fn loader ->
+                result = Dataloader.get(loader, module, {{:one, relation_module}, cast_args}, parent_id: parent.id)
+                {:ok, result}
+              end)
+
+            _ ->
+              loader
+              |> Dataloader.load(module, {relation, args}, parent)
+              |> on_load(fn loader ->
+                result = Dataloader.get(loader, module, {relation, args}, parent)
+                {:ok, result}
+              end)
+          end
+        else
+          {:ok, nil}
+        end
+      end
+    end
+  end
+
+  def make_result(module, function, result) do
+    if Enum.member?(module.__info__(:functions), {function, 1}) do
+      apply(module, function, [result])
+    else
+      key =
+        module
+        |> Module.split()
+        |> List.last()
+        |> Macro.underscore()
+        |> String.to_atom
+
+      Map.put(%{}, key, result)
+    end
+  end
+
+  defp query_name(module) do
+    module
+    |> object_plural_name
+    |> Kernel.<>("_query")
+    |> String.to_atom
+  end
+
+  defp object_plural_name(module) do
+    module
+    |> Module.split
+    |> List.last
+    |> Macro.underscore
+    |> Inflex.pluralize
+  end
+
+  defp create_permited_input(module, role, input) do
+    Map.take(input, module.create_input_fields(role))
+  end
+
+  defp update_permited_input(module, role, input) do
+    Map.take(input, module.update_input_fields(role))
+  end
+
+  defp permited_output(module, role, model) do
+    Map.drop(model, module.output_forbidden_fields(role))
+  end
+end

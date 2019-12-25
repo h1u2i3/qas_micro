@@ -1,0 +1,145 @@
+defmodule <%= schema_module_name %> do
+  use Absinthe.Schema
+
+  import Ecto.Query
+
+  alias QasMicro.Util.Sigil, as: QSigil
+
+  # generate types should be used in the schema
+  import_types(Absinthe.Type.Custom)
+  import_types(Absinthe.Plug.Types)
+  import_types(QasMicro.Common.Schema.JsonType)
+  import_types(QasMicro.Common.Schema.GeometryType)
+  import_types(QasMicro.Common.Schema.CommonType)<%= for type <- schema_type do %>
+  <%= type %><% end %>
+
+  # query part
+  query do<%= for query <- type_query do %>
+    <%= query %><% end %>
+  end
+
+  # mutation part
+  mutation do<%= for mutation <- type_mutation do %>
+    <%= mutation %><% end %>
+  end
+
+  # subscription part
+  subscription do<%= for subscription <- type_subscription do %>
+    <%= subscription %><% end %>
+  end
+
+  # middleware
+  def middleware(middleware, _field, %{identifier: :mutation}) do
+    middleware ++ [QasMicro.Common.Middleware.ErrorFallback]
+  end
+
+  def middleware(middleware, _field, _object) do
+    middleware
+  end
+
+  # plugins
+  def plugins do
+    [Absinthe.Middleware.Dataloader | Absinthe.Plugin.defaults()]
+  end
+
+  # dataloader
+  def dataloader() do
+    Dataloader.new()<%= for data <- model_data_loader do %>
+    <%= data %><% end %>
+  end
+
+  def context(ctx) do
+    Map.put(ctx, :loader, dataloader())
+  end
+
+  # all plural query<%= for query <- model_plural_query do %>
+  <%= query %><% end %>
+
+  # relations: the relation name to get the value from query
+  # type: one of :relation, :plural
+  def plural_query_reducer(module) do
+    fn arg, query ->
+      case arg do
+        {:order, order} ->
+          if order do
+            query |> order_with(order, module)
+          else
+            query
+          end
+
+        {:filter, filter} ->
+          if filter do
+            query |> filter_with(filter, module)
+          else
+            query
+          end
+
+        {:pagination, pagination} ->
+          if pagination do
+            query |> paginate_with(pagination, module)
+          else
+            query
+          end
+      end
+    end
+  end
+
+  def filter_with(query, filter, module) do
+    Enum.reduce(filter, query, fn {key, item}, query ->
+      handle_with_filter(module, query, key, item)
+    end)
+  end
+
+  def paginate_with(query, pagination, module) do
+    module.paginate_with(query, pagination)
+  end
+
+  def order_with(query, order, module) do
+    Enum.reduce(order, query, fn order_item, query ->
+      order = Map.get(order_item, :order, :asc)
+      name = String.to_atom(Map.get(order_item, :name, "id"))
+
+      case order do
+        :asc ->
+          from(q in query, order_by: [asc: field(q, ^name)])
+        :desc ->
+          from(q in query, order_by: [desc: field(q, ^name)])
+        :special ->
+          module.order_with(query, name)
+      end
+    end)
+  end
+
+  def default_url do
+    "<%= default_api_url %>"
+  end
+
+  defp handle_with_filter(module, query, key, item) do
+    item
+    |> List.wrap()
+    |> Enum.reduce(query, fn item, query ->
+      cast_item = Map.put(item, :value, item |> Map.get(:value) |> QSigil.parse())
+
+      if key == :custom do
+        module.filter_with(query, cast_item)
+      else
+        case cast_item do
+          %{cond: "like", value: value} ->
+            from(q in query, where: ilike(field(q, ^key), ^"%#{value}%"))
+
+          %{cond: "eq", value: value} ->
+            from(q in query, where: field(q, ^key) == ^value)
+
+          %{cond: "lt", value: value} ->
+            from(q in query, where: field(q, ^key) < ^value)
+
+          %{cond: "gt", value: value} ->
+            from(q in query, where: field(q, ^key) > ^value)
+
+          %{cond: "in", value: value} ->
+            from(q in query, where: field(q, ^key) in ^value)
+        end
+      end
+    end)
+  end
+end

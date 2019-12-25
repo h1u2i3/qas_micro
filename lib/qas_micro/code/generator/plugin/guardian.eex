@@ -1,0 +1,27 @@
+defmodule <%= guardian_module_name %> do
+  use Guardian, otp_app: :qas
+
+<%= for resource <- resource_names do %>
+  def subject_for_token(%<%= resource %>{} = resource, _claims) do
+    {:ok, "<%= QasMicro.Util.Helper.model_name_from_module(resource) %>_#{resource.id}"}
+  end
+<% end %>
+  def subject_for_token(_, _) do
+    {:error, "bad resource"}
+  end
+
+<%= for resource <- resource_names do %>
+  def resource_from_claims(%{"sub" => "<%= QasMicro.Util.Helper.model_name_from_module(resource) %>_" <> id}) do
+    resource = <%= repo_module_name %>.get(<%= resource %>, String.to_integer(id))
+
+    if resource do
+      {:ok,  resource}
+    else
+      {:error, "bad token"}
+    end
+  end
+<% end %>
+  def resource_from_claims(_claims) do
+    {:error, "bad token"}
+  end
+end

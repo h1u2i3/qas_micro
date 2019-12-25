@@ -1,0 +1,277 @@
+defmodule <%= schema_type_module_name %> do
+  use Absinthe.Schema.Notation
+
+  alias <%= resolver_module_name %>
+  alias <%= authorize_module_name %>
+  alias QasMicro.Common.Middleware.Callback
+
+  object :<%= name %>  do
+  <%= for field <- type_field_schema do %>
+    <%= field %><% end %><%= for relation <- type_relation_schema do %>
+    <%= relation %><% end %>
+  end
+
+  object :<%= name %>_action_result do
+    field :<%= name %>, :<%= name %>
+    field :errors, list_of(:normal_error)
+  end
+
+<%= if Map.get(type_extension, :object) do %>
+  <%= Map.get(type_extension, :object) %>
+<% end %>
+
+<%= if password do %>
+  object :auth_<%= name %> do
+    field :<%= name %>, :<%= name %>
+    field :token, :string
+    field :error, :normal_error
+  end
+<% end %>
+
+  input_object :create_<%= name %>_input do
+  <%= for create_field <- create_field_schema do %>
+    <%= create_field %>
+  <% end %>
+  end
+
+  input_object :update_<%= name %>_input do
+  <%= for update_field <- update_field_schema do %>
+    <%= update_field %>
+  <% end %>
+  end
+
+  input_object :filter_<%= name %>_input do
+  <%= for filter_field <- filter_field_schema do %>
+    <%= filter_field %>
+  <% end %>
+  end
+
+<%= if auth do %>
+<%= if normal_login_field do %>
+  input_object :create_auth_<%= name %>_input do
+  <%= for field <- normal_login_field do %>
+    <%= field %>
+  <% end %>
+  end
+<% end %>
+
+<%= if wechat_login_field do %>
+  input_object :create_wechat_auth_<%= name %>_input do
+  <%= for field <- wechat_login_field do %>
+    <%= field %>
+  <% end %>
+  end
+<% end %>
+
+<%= if wechat_miniapp_auth_field do %>
+  input_object :create_wechat_miniapp_auth_<%= name %>_input do
+  <%= for field <- wechat_miniapp_auth_field do %>
+    <%= field %>
+  <% end %>
+  end
+<% end %>
+
+<%= if sms_auth_field do %>
+  input_object :create_sms_auth_<%= name %>_input do
+  <%= for field <- sms_auth_field do %>
+    <%= field %>
+  <% end %>
+  end
+<% end %>
+
+<%= if cellphone_auth do %>
+  input_object :create_cellphone_auth_<%= name %>_input do
+    field :cellphone, :string
+  end
+<% end %>
+<% end %>
+
+<%= if password do %>
+  input_object :update_<%= name %>_password_input do
+    field(:old_password, :string)
+    field(:password, :string)
+    field(:password_confirmation, :string)
+  end
+<% end %>
+
+  object :<%= name %>_queries do
+  <%= if Map.get(type_extension, :query) do %>
+    <%= Map.get(type_extension, :query) %>
+  <% end %>
+
+  <%= if wechat_login_field do %>
+    field :jsapi_params_<%= name %>, :jsapi_params do
+      arg(:url, non_null(:string))
+      middleware(Authorize, {"<%= name %>", :all})
+      resolve(Resolver.jsapi_params())
+    end
+  <% end %>
+
+    field :<%= name %>, :<%= name %> do
+      arg(:id, non_null(:id))
+      middleware(Authorize, {"<%= name %>", :read_one})
+      resolve(Resolver.single_query(<%= type_module_name %>))
+    end
+
+    field :<%= Inflex.pluralize(name) %>, list_of(:<%= name %>) do
+      arg(:filter, :filter_<%= name %>_input)
+      arg(:order, list_of(:order_input))
+      arg(:pagination, :paginate_input)
+      middleware(Authorize, {"<%= name %>", :read_all})
+      resolve(Resolver.plural_query(<%= type_module_name %>))
+    end
+
+    field :<%= Inflex.pluralize(name) %>_count, :count_result do
+      arg(:filter, :filter_<%= name %>_input)
+      middleware(Authorize, {"<%= name %>", :read_all})
+      resolve(Resolver.count_query(<%= type_module_name %>))
+    end
+  <%= if password do %>
+    field :current_<%= name %>, :<%= name %> do
+      resolve(Resolver.current_user(<%= type_module_name %>))
+    end
+  <% end %>
+  end
+
+  object :<%= name %>_mutations do
+
+  <%= if Map.get(type_extension, :mutation) do %>
+    <%= Map.get(type_extension, :mutation) %>
+  <% end %>
+
+<%= if auth do %>
+  <%= if normal_login_field do %>
+    field :create_auth_<%= name %>, :auth_<%= name %> do
+      arg(:input, non_null(:create_auth_<%= name %>_input))
+      resolve(Resolver.auth(<%= type_module_name %>))
+      middleware(Callback, {:<%= application_name %>, :user_authenticated})
+    end
+  <% end %>
+
+  <%= if wechat_login_field do %>
+    field :create_wechat_auth_<%= name %>, :auth_<%= name %> do
+      arg(:input, non_null(:create_wechat_auth_<%= name %>_input))
+      resolve(Resolver.wechat_auth(<%= type_module_name %>))
+      middleware(Callback, {:<%= application_name %>, :wechat_user_authenticated})
+    end
+  <% end %>
+
+  <%= if wechat_miniapp_auth_field do %>
+    field :create_wechat_miniapp_auth_<%= name %>, :auth_<%= name %> do
+      arg(:input, non_null(:create_wechat_miniapp_auth_<%= name %>_input))
+      resolve(Resolver.wechat_miniapp_auth(<%= type_module_name %>))
+      middleware(Callback, {:<%= application_name %>, :wechat_user_authenticated})
+    end
+  <% end %>
+
+  <%= if sms_auth_field do %>
+    field :send_sms, :action_result do
+      arg(:cellphone, non_null(:string))
+      resolve(Resolver.send_sms(<%= type_module_name %>))
+      middleware(Callback, {:<%= application_name %>, :sms_sent})
+    end
+
+    field :create_sms_auth_<%= name %>, :auth_<%= name %> do
+      arg(:input, non_null(:create_sms_auth_<%= name %>_input))
+      resolve(Resolver.sms_auth(<%= type_module_name %>))
+      middleware(Callback, {:<%= application_name %>, :sms_user_authenticated})
+    end
+  <% end %>
+
+  <%= if cellphone_auth do %>
+    field :create_cellphone_auth_<%= name %>, :auth_<%= name %> do
+      arg(:input, non_null(:create_cellphone_auth_<%= name %>_input))
+      resolve(Resolver.cellphone_auth(<%= type_module_name %>))
+      middleware(Callback, {:<%= application_name %>, :cellphone_user_authenticated})
+    end
+  <% end %>
+
+    field :update_current_<%= name %>, :<%= name %>_action_result do
+      arg(:input, non_null(:update_<%= name %>_input))
+      middleware(Authorize, {"<%= name %>", :update})
+      resolve(Resolver.update_current(<%= type_module_name %>))
+      middleware(Callback, {:<%= application_name %>, :current_user_updated})
+    end
+<% end %>
+
+  <%= if password do %>
+    field :update_<%= name %>_password, :<%= name %>_action_result do
+      arg(:input, non_null(:update_<%= name %>_password_input))
+      middleware(Authorize, {"<%= name %>", :update})
+      resolve(Resolver.update_password(<%= type_module_name %>))
+    end
+  <% end %>
+
+
+  field :create_<%= name %>, :<%= name %>_action_result do
+    arg(:input, non_null(:create_<%= name %>_input))
+    middleware(Authorize, {"<%= name %>", :create})
+    resolve(Resolver.create(<%= type_module_name %>))
+    middleware(Callback, {:<%= application_name %>, :<%= name %>_created})
+  end
+
+<%= with {field, normal_statuses} <- normal_status_mutation_attrs do %>
+<%= for status <- normal_statuses do %>
+  field :update_<%= name %>_<%= field %>_<%= status %>, :<%= name %>_action_result do
+    arg(:id, non_null(:id))
+    resolve(Resolver.status_change(<%= type_module_name %>, "<%= field %>", "<%= status %>"))
+    middleware(Callback, {:<%= application_name %>, :<%= name %>_updated})
+  end
+<% end %>
+<% end %>
+
+    field :update_<%= name %>, :<%= name %>_action_result do
+      arg(:id, non_null(:id))
+      arg(:input, :update_<%= name %>_input)
+      middleware(Authorize, {"<%= name %>", :update})
+      resolve(Resolver.update(<%= type_module_name %>))
+      middleware(Callback, {:<%= application_name %>, :<%= name %>_updated})
+    end
+
+    field :delete_<%= name %>, :action_result do
+      arg(:id, non_null(:id))
+      middleware(Authorize, {"<%= name %>", :delete})
+      resolve(Resolver.delete(<%= type_module_name %>))
+      middleware(Callback, {:<%= application_name %>, :<%= name %>_deleted})
+    end
+
+  <%= if wechat_jsapi_pay do %>
+    field :wechat_jsapi_pay_<%= name %>, :wechat_jsapi_pay do
+      arg(:input, non_null(:wechat_jsapi_pay_input))
+      middleware(Authorize, {"<%= name %>", :create})
+      resolve(Resolver.wechat_jsapi_params(<%= type_module_name %>))
+    end
+  <% end %>
+
+  <%= if alipay_app_pay do %>
+    field :alipay_sign_<%= name %>, :alipay_order_string do
+      arg(:input, non_null(:alipay_app_pay_input))
+      middleware(Authorize, {"<%= name %>", :read_one})
+      resolve(Resolver.alipay_app_pay_sign(<%= type_module_name %>))
+    end
+  <% end %>
+
+  <%= if wechat_app_pay do %>
+    field :wechat_pay_sign_<%= name %>, :wechat_app_pay_order do
+      arg(:input, non_null(:wechat_pay_sign_input))
+      middleware(Authorize, {"<%= name %>", :read_one})
+      resolve(Resolver.wechat_app_pay_sign(<%= type_module_name %>))
+    end
+  <% end %>
+  end
+
+  object :<%= name %>_subscriptions do
+    field :<%= name %>_created, :<%= name %> do
+      config fn _, %{context: %{current_user: current_user, role: role}} ->
+        if Authorize.correct_role?(current_user, role, {"<%= name %>", :manage_notice}) do
+          {:ok, topic: "<%= name %>_created:*"}
+        else
+          {:error, "unauthorized"}
+        end
+      end
+    end
+  <%= if Map.get(type_extension, :subscription) do %>
+    <%= Map.get(type_extension, :subscription) %>
+  <% end %>
+  end
+end
