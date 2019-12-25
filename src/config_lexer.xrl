@@ -41,6 +41,11 @@ SECTION_WECHAT       = wechat
 SECTION_CALLBACK     = callback
 SECTION_EXTENSION    = extension
 SECTION_GLOBAL       = global
+SECTION_SERVICE      = service
+SECTION_TYPE         = type
+SECTION_INPUT_TYPE   = input_type
+SECTION_QUERY        = query
+SECTION_MUTATION     = mutation
 BLOCK_START          = do
 BLOCK_END            = end
 
@@ -65,6 +70,11 @@ Rules.
 {SECTION_WORKER}        : {token, {'section_worker', TokenLine}}.
 {SECTION_SETTING}       : {token, {'section_setting', TokenLine}}.
 {SECTION_GLOBAL}        : {token, {'section_global', TokenLine}}.
+{SECTION_SERVICE}       : {token, {'section_service', TokenLine}}.
+{SECTION_TYPE}          : {token, {'section_type', TokenLine}}.
+{SECTION_INPUT_TYPE}    : {token, {'section_input_type', TokenLine}}.
+{SECTION_QUERY}         : {token, {'section_query', TokenLine}}.
+{SECTION_MUTATION}      : {token, {'section_mutation', TokenLine}}.
 {BLOCK_START}           : {token, {'do_exp', TokenLine}}.
 {BLOCK_END}             : {token, {'end_exp', TokenLine}}.
 {LEFT_PARENTHESES}      : {token, {'(', TokenLine}}.
