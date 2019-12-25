@@ -86,7 +86,7 @@ defmodule QasMicro.Config do
           "#{database_name()}_#{Mix.env()}"
         end
 
-        def save_file(string, filename, sub_folder \\ nil) do
+        def save_file(string, filename, sub_folder \\ nil, replace_origin \\ true) do
           case options().save_to_file do
             true ->
               root_folder = options().save_folder
@@ -100,10 +100,15 @@ defmodule QasMicro.Config do
 
               File.mkdir_p(folder)
 
-              [folder, filename]
-              |> Path.join()
-              # |> File.write!(string)
-              |> File.write!(Code.format_string!(string))
+              path = Path.join([folder, filename])
+
+              if replace_origin do
+                File.write!(path, Code.format_string!(string))
+              else
+                if !File.exists?(path) do
+                  File.write!(path, Code.format_string!(string))
+                end
+              end
 
             false ->
               :ok

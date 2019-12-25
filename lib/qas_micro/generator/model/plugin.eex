@@ -1,0 +1,178 @@
+defmodule <%= model_plugin_module %> do
+  defmacro __using__(_opts) do
+    quote do
+      use Ecto.Schema
+
+      import Ecto.Query
+      import Geo.PostGIS
+      import QasMicro.Util.Sigil
+      import QasMicro.Util.Helper
+
+      alias <%= repo_module_name %>
+
+    <%= if polymorphic do %>
+      schema "abstract table: <%= table_name %>" do<%= for field <- field_schema do %>
+        <%= field %><% end %><%= for relation <- relation_schema do %>
+        <%= relation %><% end %>
+        field :assoc_id, :integer
+        <%= if(timestamp, do: "timestamps(inserted_at: :created_at, type: :integer)") %>
+      end
+    <% else %>
+      schema "<%= table_name %>" do<%= for field <- field_schema do %>
+        <%= field %><% end %><%= for relation <- relation_schema do %>
+        <%= relation %><% end %>
+        <%= if(timestamp, do: "timestamps(inserted_at: :created_at, type: :integer)") %>
+      end
+    <% end %>
+
+      @create_fields <%= create_fields %>
+      @update_fields <%= update_fields %><%= if password do %>
+      @password_fields [:password, :password_confirmation]<% end %>
+
+      def create_changeset(struct, params \\ %{}, _role \\ :visitor) do
+        struct
+        |> Ecto.Changeset.cast(params, @create_fields)<%= for validation <- create_validation do %>
+        <%= validation %><% end %><%= if password do %>
+        |> generate_password_digest()<% end %><%= if unique_number do %>
+        |> generate_unique_number()<% end %><%= if geometry do %>
+        |> cast_geometry()
+        <% end %>
+      end
+
+    <%= for status_changeset_method <- status_changeset_methods do %>
+      <%= status_changeset_method %>
+    <% end %>
+
+      def update_changeset(struct, params \\ %{}, _role \\ :visitor) do
+        struct
+        |> Ecto.Changeset.change()
+        |> Ecto.Changeset.cast(params, @update_fields)<%= for validation <- update_validation do %>
+        <%= validation %><% end %><%= if geometry do %>
+        |> cast_geometry()
+        <% end %>
+      end
+
+    <%= if geometry do %>
+      def cast_geometry(changeset) do
+        if Enum.empty?(changeset.errors) do
+          lon = Ecto.Changeset.get_change(changeset, :lon)
+          lat = Ecto.Changeset.get_change(changeset, :lat)
+
+          if lon && lat do
+            Ecto.Changeset.put_change(changeset, :geom, %Geo.Point{coordinates: {lon, lat}, srid: 4326})
+          else
+            changeset
+          end
+        else
+          changeset
+        end
+      end
+    <% end %>
+
+    <%= if password do %>
+      def password_changeset(struct, params \\ %{}) do
+        struct
+        |> Ecto.Changeset.change()
+        |> Ecto.Changeset.cast(params, @password_fields)
+        |> Ecto.Changeset.validate_confirmation(:password, [])
+        |> check_old_password(Map.get(params, :old_password))
+        |> generate_password_digest
+      end
+
+      defp check_old_password(changeset, old_password) do
+        if Bcrypt.verify_pass(old_password, changeset.data.password_digest) do
+          changeset
+        else
+          Ecto.Changeset.add_error(changeset, :password, "wrong old password")
+        end
+      end
+
+      def generate_password_digest(changeset) do
+        if Enum.empty?(changeset.errors) do
+          plain_passwd = Ecto.Changeset.get_change(changeset, :password)
+          Ecto.Changeset.put_change(changeset, :password_digest, Bcrypt.hash_pwd_salt(plain_passwd))
+        else
+          changeset
+        end
+      end
+    <% end %>
+
+    <%= if auth do %>
+      def auth(input) do
+        with {:ok, user} <- sign_in(input),
+             {:ok, token, _claims} <- <%= guardian_module_name %>.encode_and_sign(user, %{}, token_type: "token") do
+          {:ok, %{token: token, <%= object_name %>: user}}
+        else
+          {:error, reason} ->
+            {:ok, %{error: %{key: :unauthorized, message: reason}}}
+        end
+      end
+
+      defp sign_in(input) do
+        {password, cast_input} = Map.pop(input, :password)
+        cast_input_keyword = QasMicro.Util.Helper.map_to_keyword(cast_input)
+
+        user = Repo.get_by(<%= model_module %>, cast_input_keyword)
+
+        if password do
+          # password authenticate
+          check_result =
+            case user do
+              nil -> Bcrypt.no_user_verify()
+              _ -> Bcrypt.verify_pass(password, user.password_digest)
+            end
+
+          if check_result do
+            {:ok, user}
+          else
+            {:error, "user does not exist or wrong password"}
+          end
+        else
+          {:error, "user does not exist or wrong password"}
+        end
+      end
+
+      defp find_or_create_with_cellphone(info) do
+        user = Repo.get_by(<%= model_module %>, QasMicro.Util.Helper.map_to_keyword(info))
+
+        case user do
+          nil ->
+            new()
+            |> Ecto.Changeset.change(info)
+            |> Repo.insert
+            |> case do
+              {:ok, user} ->
+                <%= config_module %>.callback_module().on_event("<%= object_name %>_created", user)
+                {:ok, user}
+
+              {:error, changeset} ->
+                {:error, changeset}
+            end
+
+          _ ->
+            {:ok, user}
+        end
+      end
+    <% end %>
+
+      # return empty struct
+      def new do
+        %__MODULE__{}
+      end
+
+      def all_fields do
+        <%= all_fields %>
+      end
+
+      def create_fields do
+        <%= create_fields %>
+      end
+
+      def update_fields do
+        <%= update_fields %>
+      end
+
+      defoverridable Module.definitions_in(__MODULE__, :def)
+    end
+  end
+end

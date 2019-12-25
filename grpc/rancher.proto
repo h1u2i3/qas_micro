@@ -1,0 +1,2826 @@
+syntax = "proto3";
+
+import "common.proto";
+import "admin.proto";
+
+
+option java_multiple_files = true;
+option java_package = "io.aman.wxj.rancher";
+option java_outer_classname = "Rancher";
+
+package rancher;
+
+
+message FilterRepoInput {
+  string code = 1;
+  string sketches = 2;
+  string user_id = 3;
+  string price = 4;
+  string belongable_id = 5;
+  string belongable_type = 6;
+
+}
+
+message ReposParams {
+  FilterRepoInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 user_ids = 6;
+
+}
+
+message CreateRepoInput {
+  string code = 1;
+  string sketches = 2;
+  int32 user_id = 3;
+  string price = 4;
+  int32 belongable_id = 5;
+  string belongable_type = 6;
+
+  common.UserInfo user = 7;
+}
+
+message UpdateRepoInput {
+  string code = 1;
+  string sketches = 2;
+  int32 user_id = 3;
+  string price = 4;
+  int32 belongable_id = 5;
+  string belongable_type = 6;
+
+  common.UserInfo user = 7;
+  int32 id = 8;
+}
+
+message Repo {
+  int32 id = 1;
+  string code = 2;
+  string sketches = 3;
+  int32 user_id = 4;
+  string price = 5;
+  int32 belongable_id = 6;
+  string belongable_type = 7;
+  admin.User user = 8;
+  repeated rancher.RepoProduct repo_products = 9;
+  int32 created_at = 10;
+  int32 updated_at = 11;
+
+}
+
+message Repos {
+  repeated Repo repos = 1;
+}
+
+message RepoResult {
+  Repo repo = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterRoomInput {
+  string code = 1;
+  string spec_id = 2;
+  string name = 3;
+  string rough = 4;
+  string precise = 5;
+  string area = 6;
+
+}
+
+message RoomsParams {
+  FilterRoomInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 spec_ids = 6;
+
+}
+
+message CreateRoomInput {
+  string code = 1;
+  int32 spec_id = 2;
+  string name = 3;
+  string rough = 4;
+  string precise = 5;
+  float area = 6;
+
+  common.UserInfo user = 7;
+}
+
+message UpdateRoomInput {
+  string code = 1;
+  int32 spec_id = 2;
+  string name = 3;
+  string rough = 4;
+  string precise = 5;
+  float area = 6;
+
+  common.UserInfo user = 7;
+  int32 id = 8;
+}
+
+message Room {
+  int32 id = 1;
+  string code = 2;
+  int32 spec_id = 3;
+  string name = 4;
+  string rough = 5;
+  string precise = 6;
+  float area = 7;
+  rancher.Spec spec = 8;
+  int32 created_at = 9;
+  int32 updated_at = 10;
+
+}
+
+message Rooms {
+  repeated Room rooms = 1;
+}
+
+message RoomResult {
+  Room room = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterSaledReviewInput {
+  string code = 1;
+  string order_sale_id = 2;
+  string deadline_at = 3;
+  string user_id = 4;
+
+}
+
+message SaledReviewsParams {
+  FilterSaledReviewInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 order_sale_ids = 6;
+  repeated int32 user_ids = 7;
+
+}
+
+message CreateSaledReviewInput {
+  string code = 1;
+  int32 order_sale_id = 2;
+  int32 deadline_at = 3;
+  int32 user_id = 4;
+
+  common.UserInfo user = 5;
+}
+
+message UpdateSaledReviewInput {
+  string code = 1;
+  int32 order_sale_id = 2;
+  int32 deadline_at = 3;
+  int32 user_id = 4;
+
+  common.UserInfo user = 5;
+  int32 id = 6;
+}
+
+message SaledReview {
+  int32 id = 1;
+  string code = 2;
+  int32 order_sale_id = 3;
+  int32 deadline_at = 4;
+  int32 user_id = 5;
+  rancher.OrderSale order_sale = 6;
+  admin.User user = 7;
+  int32 created_at = 8;
+  int32 updated_at = 9;
+
+}
+
+message SaledReviews {
+  repeated SaledReview saled_reviews = 1;
+}
+
+message SaledReviewResult {
+  SaledReview saled_review = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterQuoteInput {
+  string code = 1;
+  string name = 2;
+  string spec_id = 3;
+  string case_id = 4;
+  string user_id = 5;
+  string remark = 6;
+
+}
+
+message QuotesParams {
+  FilterQuoteInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 spec_ids = 6;
+  repeated int32 case_ids = 7;
+  repeated int32 user_ids = 8;
+
+}
+
+message CreateQuoteInput {
+  string code = 1;
+  string name = 2;
+  int32 spec_id = 3;
+  int32 case_id = 4;
+  int32 user_id = 5;
+  string remark = 6;
+
+  common.UserInfo user = 7;
+}
+
+message UpdateQuoteInput {
+  string code = 1;
+  string name = 2;
+  int32 spec_id = 3;
+  int32 case_id = 4;
+  int32 user_id = 5;
+  string remark = 6;
+
+  common.UserInfo user = 7;
+  int32 id = 8;
+}
+
+message Quote {
+  int32 id = 1;
+  string code = 2;
+  string name = 3;
+  int32 spec_id = 4;
+  int32 case_id = 5;
+  int32 user_id = 6;
+  string remark = 7;
+  rancher.Spec spec = 8;
+  rancher.Case case = 9;
+  admin.User user = 10;
+  int32 created_at = 11;
+  int32 updated_at = 12;
+
+}
+
+message Quotes {
+  repeated Quote quotes = 1;
+}
+
+message QuoteResult {
+  Quote quote = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterTicketInput {
+  string code = 1;
+  string house_id = 2;
+  string customer_type = 3;
+  string customer_tags = 4;
+  string expect_arrive_at = 5;
+  string arrived_at = 6;
+  string status = 7;
+  string user_id = 8;
+
+}
+
+message TicketsParams {
+  FilterTicketInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 house_ids = 6;
+  repeated int32 user_ids = 7;
+
+}
+
+message CreateTicketInput {
+  string code = 1;
+  int32 house_id = 2;
+  string customer_type = 3;
+  string customer_tags = 4;
+  int32 expect_arrive_at = 5;
+  int32 arrived_at = 6;
+  int32 status = 7;
+  int32 user_id = 8;
+
+  common.UserInfo user = 9;
+}
+
+message UpdateTicketInput {
+  string code = 1;
+  int32 house_id = 2;
+  string customer_type = 3;
+  string customer_tags = 4;
+  int32 expect_arrive_at = 5;
+  int32 arrived_at = 6;
+  int32 status = 7;
+  int32 user_id = 8;
+
+  common.UserInfo user = 9;
+  int32 id = 10;
+}
+
+message Ticket {
+  int32 id = 1;
+  string code = 2;
+  int32 house_id = 3;
+  string customer_type = 4;
+  string customer_tags = 5;
+  int32 expect_arrive_at = 6;
+  int32 arrived_at = 7;
+  int32 status = 8;
+  int32 user_id = 9;
+  rancher.House house = 10;
+  admin.User user = 11;
+  repeated rancher.Story stories = 12;
+  repeated rancher.Trace traces = 13;
+  int32 created_at = 14;
+  int32 updated_at = 15;
+
+}
+
+message Tickets {
+  repeated Ticket tickets = 1;
+}
+
+message TicketResult {
+  Ticket ticket = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterTraceInput {
+  string code = 1;
+  string ticket_id = 2;
+  string customer_id = 3;
+  string confirmed_at = 4;
+  string arrived_at = 5;
+  string user_id = 6;
+  string remark = 7;
+
+}
+
+message TracesParams {
+  FilterTraceInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 ticket_ids = 6;
+  repeated int32 customer_ids = 7;
+  repeated int32 user_ids = 8;
+
+}
+
+message CreateTraceInput {
+  string code = 1;
+  int32 ticket_id = 2;
+  int32 customer_id = 3;
+  int32 confirmed_at = 4;
+  int32 arrived_at = 5;
+  int32 user_id = 6;
+  string remark = 7;
+
+  common.UserInfo user = 8;
+}
+
+message UpdateTraceInput {
+  string code = 1;
+  int32 ticket_id = 2;
+  int32 customer_id = 3;
+  int32 confirmed_at = 4;
+  int32 arrived_at = 5;
+  int32 user_id = 6;
+  string remark = 7;
+
+  common.UserInfo user = 8;
+  int32 id = 9;
+}
+
+message Trace {
+  int32 id = 1;
+  string code = 2;
+  int32 ticket_id = 3;
+  int32 customer_id = 4;
+  int32 confirmed_at = 5;
+  int32 arrived_at = 6;
+  int32 user_id = 7;
+  string remark = 8;
+  rancher.Ticket ticket = 9;
+  rancher.Customer customer = 10;
+  admin.User user = 11;
+  int32 created_at = 12;
+  int32 updated_at = 13;
+
+}
+
+message Traces {
+  repeated Trace traces = 1;
+}
+
+message TraceResult {
+  Trace trace = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterOrderInput {
+  string code = 1;
+  string trace_id = 2;
+  string house_address = 3;
+  string sign_at = 4;
+  string expect_hand_over_at = 5;
+  string cooperated_period = 6;
+  string customer_id = 7;
+  string price = 8;
+  string price_cn = 9;
+  string price_off = 10;
+  string price_off_cn = 11;
+  string paid_percent = 12;
+  string status = 13;
+  string user_id = 14;
+
+}
+
+message OrdersParams {
+  FilterOrderInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 trace_ids = 6;
+  repeated int32 customer_ids = 7;
+  repeated int32 user_ids = 8;
+
+}
+
+message CreateOrderInput {
+  string code = 1;
+  int32 trace_id = 2;
+  string house_address = 3;
+  int32 sign_at = 4;
+  int32 expect_hand_over_at = 5;
+  string cooperated_period = 6;
+  int32 customer_id = 7;
+  string price = 8;
+  string price_cn = 9;
+  string price_off = 10;
+  string price_off_cn = 11;
+  string paid_percent = 12;
+  int32 status = 13;
+  int32 user_id = 14;
+
+  common.UserInfo user = 15;
+}
+
+message UpdateOrderInput {
+  string code = 1;
+  int32 trace_id = 2;
+  string house_address = 3;
+  int32 sign_at = 4;
+  int32 expect_hand_over_at = 5;
+  string cooperated_period = 6;
+  int32 customer_id = 7;
+  string price = 8;
+  string price_cn = 9;
+  string price_off = 10;
+  string price_off_cn = 11;
+  string paid_percent = 12;
+  int32 status = 13;
+  int32 user_id = 14;
+
+  common.UserInfo user = 15;
+  int32 id = 16;
+}
+
+message Order {
+  int32 id = 1;
+  string code = 2;
+  int32 trace_id = 3;
+  string house_address = 4;
+  int32 sign_at = 5;
+  int32 expect_hand_over_at = 6;
+  string cooperated_period = 7;
+  int32 customer_id = 8;
+  string price = 9;
+  string price_cn = 10;
+  string price_off = 11;
+  string price_off_cn = 12;
+  string paid_percent = 13;
+  int32 status = 14;
+  int32 user_id = 15;
+  rancher.Trace trace = 16;
+  rancher.Customer customer = 17;
+  admin.User user = 18;
+  repeated rancher.Payment payments = 19;
+  repeated rancher.OrderPurchasePlan order_purchase_plans = 20;
+  repeated rancher.OrderDealPlan order_deal_plans = 21;
+  repeated rancher.OrderSale order_sales = 22;
+  repeated rancher.OrderBill order_bills = 23;
+  int32 created_at = 24;
+  int32 updated_at = 25;
+
+}
+
+message Orders {
+  repeated Order orders = 1;
+}
+
+message OrderResult {
+  Order order = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterOrderDealPlanInput {
+  string code = 1;
+  string order_id = 2;
+  string name = 3;
+  string start_at = 4;
+  string end_at = 5;
+  string actual_start_at = 6;
+  string actual_end_at = 7;
+  string worker_name = 8;
+  string worker_cellphone = 9;
+  string status = 10;
+  string vouchers = 11;
+  string user_id = 12;
+  string responser_id = 13;
+
+}
+
+message OrderDealPlansParams {
+  FilterOrderDealPlanInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 order_ids = 6;
+  repeated int32 user_ids = 7;
+  repeated int32 responser_ids = 8;
+
+}
+
+message CreateOrderDealPlanInput {
+  string code = 1;
+  int32 order_id = 2;
+  string name = 3;
+  int32 start_at = 4;
+  int32 end_at = 5;
+  int32 actual_start_at = 6;
+  int32 actual_end_at = 7;
+  string worker_name = 8;
+  string worker_cellphone = 9;
+  int32 status = 10;
+  string vouchers = 11;
+  int32 user_id = 12;
+  int32 responser_id = 13;
+
+  common.UserInfo user = 14;
+}
+
+message UpdateOrderDealPlanInput {
+  string code = 1;
+  int32 order_id = 2;
+  string name = 3;
+  int32 start_at = 4;
+  int32 end_at = 5;
+  int32 actual_start_at = 6;
+  int32 actual_end_at = 7;
+  string worker_name = 8;
+  string worker_cellphone = 9;
+  int32 status = 10;
+  string vouchers = 11;
+  int32 user_id = 12;
+  int32 responser_id = 13;
+
+  common.UserInfo user = 14;
+  int32 id = 15;
+}
+
+message OrderDealPlan {
+  int32 id = 1;
+  string code = 2;
+  int32 order_id = 3;
+  string name = 4;
+  int32 start_at = 5;
+  int32 end_at = 6;
+  int32 actual_start_at = 7;
+  int32 actual_end_at = 8;
+  string worker_name = 9;
+  string worker_cellphone = 10;
+  int32 status = 11;
+  string vouchers = 12;
+  int32 user_id = 13;
+  int32 responser_id = 14;
+  rancher.Order order = 15;
+  admin.User user = 16;
+  admin.User responser = 17;
+  int32 created_at = 18;
+  int32 updated_at = 19;
+
+}
+
+message OrderDealPlans {
+  repeated OrderDealPlan order_deal_plans = 1;
+}
+
+message OrderDealPlanResult {
+  OrderDealPlan order_deal_plan = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterOrderDealInput {
+  string repo_product_id = 1;
+  string order_deal_plan_id = 2;
+
+}
+
+message OrderDealsParams {
+  FilterOrderDealInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 order_deal_plan_ids = 6;
+  repeated int32 repo_product_ids = 7;
+
+}
+
+message CreateOrderDealInput {
+  int32 repo_product_id = 1;
+  int32 order_deal_plan_id = 2;
+
+  common.UserInfo user = 3;
+}
+
+message UpdateOrderDealInput {
+  int32 repo_product_id = 1;
+  int32 order_deal_plan_id = 2;
+
+  common.UserInfo user = 3;
+  int32 id = 4;
+}
+
+message OrderDeal {
+  int32 id = 1;
+  int32 repo_product_id = 2;
+  int32 order_deal_plan_id = 3;
+  rancher.OrderDealPlan order_deal_plan = 4;
+  rancher.RepoProduct repo_product = 5;
+  int32 created_at = 6;
+  int32 updated_at = 7;
+
+}
+
+message OrderDeals {
+  repeated OrderDeal order_deals = 1;
+}
+
+message OrderDealResult {
+  OrderDeal order_deal = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterOrderPurchasePlanInput {
+  string code = 1;
+  string order_id = 2;
+  string vendor_id = 3;
+  string repo_product_id = 4;
+  string status = 5;
+  string vouchers = 6;
+  string user_id = 7;
+
+}
+
+message OrderPurchasePlansParams {
+  FilterOrderPurchasePlanInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 order_ids = 6;
+  repeated int32 vendor_ids = 7;
+  repeated int32 repo_product_ids = 8;
+  repeated int32 user_ids = 9;
+
+}
+
+message CreateOrderPurchasePlanInput {
+  string code = 1;
+  int32 order_id = 2;
+  int32 vendor_id = 3;
+  int32 repo_product_id = 4;
+  int32 status = 5;
+  string vouchers = 6;
+  int32 user_id = 7;
+
+  common.UserInfo user = 8;
+}
+
+message UpdateOrderPurchasePlanInput {
+  string code = 1;
+  int32 order_id = 2;
+  int32 vendor_id = 3;
+  int32 repo_product_id = 4;
+  int32 status = 5;
+  string vouchers = 6;
+  int32 user_id = 7;
+
+  common.UserInfo user = 8;
+  int32 id = 9;
+}
+
+message OrderPurchasePlan {
+  int32 id = 1;
+  string code = 2;
+  int32 order_id = 3;
+  int32 vendor_id = 4;
+  int32 repo_product_id = 5;
+  int32 status = 6;
+  string vouchers = 7;
+  int32 user_id = 8;
+  rancher.Order order = 9;
+  rancher.Vendor vendor = 10;
+  rancher.RepoProduct repo_product = 11;
+  admin.User user = 12;
+  int32 created_at = 13;
+  int32 updated_at = 14;
+
+}
+
+message OrderPurchasePlans {
+  repeated OrderPurchasePlan order_purchase_plans = 1;
+}
+
+message OrderPurchasePlanResult {
+  OrderPurchasePlan order_purchase_plan = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterRepoProductInput {
+  string repo_id = 1;
+  string product_id = 2;
+  string room_id = 3;
+  string num = 4;
+  string remark = 5;
+  string addition_price = 6;
+  string addition_name = 7;
+  string length = 8;
+  string height = 9;
+  string user_id = 10;
+
+}
+
+message RepoProductsParams {
+  FilterRepoProductInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 repo_ids = 6;
+  repeated int32 user_ids = 7;
+  repeated int32 product_ids = 8;
+  repeated int32 room_ids = 9;
+
+}
+
+message CreateRepoProductInput {
+  int32 repo_id = 1;
+  int32 product_id = 2;
+  int32 room_id = 3;
+  int32 num = 4;
+  string remark = 5;
+  string addition_price = 6;
+  string addition_name = 7;
+  string length = 8;
+  string height = 9;
+  int32 user_id = 10;
+
+  common.UserInfo user = 11;
+}
+
+message UpdateRepoProductInput {
+  int32 repo_id = 1;
+  int32 product_id = 2;
+  int32 room_id = 3;
+  int32 num = 4;
+  string remark = 5;
+  string addition_price = 6;
+  string addition_name = 7;
+  string length = 8;
+  string height = 9;
+  int32 user_id = 10;
+
+  common.UserInfo user = 11;
+  int32 id = 12;
+}
+
+message RepoProduct {
+  int32 id = 1;
+  int32 repo_id = 2;
+  int32 product_id = 3;
+  int32 room_id = 4;
+  int32 num = 5;
+  string remark = 6;
+  string addition_price = 7;
+  string addition_name = 8;
+  string length = 9;
+  string height = 10;
+  int32 user_id = 11;
+  rancher.Repo repo = 12;
+  admin.User user = 13;
+  rancher.Product product = 14;
+  rancher.Room room = 15;
+  int32 created_at = 16;
+  int32 updated_at = 17;
+
+}
+
+message RepoProducts {
+  repeated RepoProduct repo_products = 1;
+}
+
+message RepoProductResult {
+  RepoProduct repo_product = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterRepoReviewAssignInput {
+  string repo_review_id = 1;
+  string product_type_id = 2;
+  string user_id = 3;
+
+}
+
+message RepoReviewAssignsParams {
+  FilterRepoReviewAssignInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 repo_review_ids = 6;
+  repeated int32 user_ids = 7;
+
+}
+
+message CreateRepoReviewAssignInput {
+  int32 repo_review_id = 1;
+  int32 product_type_id = 2;
+  int32 user_id = 3;
+
+  common.UserInfo user = 4;
+}
+
+message UpdateRepoReviewAssignInput {
+  int32 repo_review_id = 1;
+  int32 product_type_id = 2;
+  int32 user_id = 3;
+
+  common.UserInfo user = 4;
+  int32 id = 5;
+}
+
+message RepoReviewAssign {
+  int32 id = 1;
+  int32 repo_review_id = 2;
+  int32 product_type_id = 3;
+  int32 user_id = 4;
+  rancher.RepoReview repo_review = 5;
+  admin.User user = 6;
+  int32 created_at = 7;
+  int32 updated_at = 8;
+
+}
+
+message RepoReviewAssigns {
+  repeated RepoReviewAssign repo_review_assigns = 1;
+}
+
+message RepoReviewAssignResult {
+  RepoReviewAssign repo_review_assign = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterCaseInput {
+  string code = 1;
+  string name = 2;
+  string spec = 3;
+  string price = 4;
+  string user_id = 5;
+
+}
+
+message CasesParams {
+  FilterCaseInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 user_ids = 6;
+
+}
+
+message CreateCaseInput {
+  string code = 1;
+  string name = 2;
+  string spec = 3;
+  string price = 4;
+  int32 user_id = 5;
+
+  common.UserInfo user = 6;
+}
+
+message UpdateCaseInput {
+  string code = 1;
+  string name = 2;
+  string spec = 3;
+  string price = 4;
+  int32 user_id = 5;
+
+  common.UserInfo user = 6;
+  int32 id = 7;
+}
+
+message Case {
+  int32 id = 1;
+  string code = 2;
+  string name = 3;
+  string spec = 4;
+  string price = 5;
+  int32 user_id = 6;
+  admin.User user = 7;
+  int32 created_at = 8;
+  int32 updated_at = 9;
+
+}
+
+message Cases {
+  repeated Case cases = 1;
+}
+
+message CaseResult {
+  Case case = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterHouseInput {
+  string code = 1;
+  string prompt_code = 2;
+  string spec_id = 3;
+  string address = 4;
+
+}
+
+message HousesParams {
+  FilterHouseInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 spec_ids = 6;
+
+}
+
+message CreateHouseInput {
+  string code = 1;
+  string prompt_code = 2;
+  int32 spec_id = 3;
+  string address = 4;
+
+  common.UserInfo user = 5;
+}
+
+message UpdateHouseInput {
+  string code = 1;
+  string prompt_code = 2;
+  int32 spec_id = 3;
+  string address = 4;
+
+  common.UserInfo user = 5;
+  int32 id = 6;
+}
+
+message House {
+  int32 id = 1;
+  string code = 2;
+  string prompt_code = 3;
+  int32 spec_id = 4;
+  string address = 5;
+  rancher.Spec spec = 6;
+  repeated rancher.Customer customers = 7;
+  int32 created_at = 8;
+  int32 updated_at = 9;
+
+}
+
+message Houses {
+  repeated House houses = 1;
+}
+
+message HouseResult {
+  House house = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterMessageInput {
+  string sender_id = 1;
+  string content = 2;
+  string receiver_id = 3;
+  string is_read = 4;
+  string is_send = 5;
+
+}
+
+message MessagesParams {
+  FilterMessageInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 sender_ids = 6;
+  repeated int32 receiver_ids = 7;
+
+}
+
+message CreateMessageInput {
+  int32 sender_id = 1;
+  string content = 2;
+  int32 receiver_id = 3;
+  bool is_read = 4;
+  bool is_send = 5;
+
+  common.UserInfo user = 6;
+}
+
+message UpdateMessageInput {
+  int32 sender_id = 1;
+  string content = 2;
+  int32 receiver_id = 3;
+  bool is_read = 4;
+  bool is_send = 5;
+
+  common.UserInfo user = 6;
+  int32 id = 7;
+}
+
+message Message {
+  int32 id = 1;
+  int32 sender_id = 2;
+  string content = 3;
+  int32 receiver_id = 4;
+  bool is_read = 5;
+  bool is_send = 6;
+  admin.User sender = 7;
+  admin.User receiver = 8;
+  int32 created_at = 9;
+  int32 updated_at = 10;
+
+}
+
+message Messages {
+  repeated Message messages = 1;
+}
+
+message MessageResult {
+  Message message = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterPaymentInput {
+  string order_id = 1;
+  string code = 2;
+  string pay_method = 3;
+  string vouchers = 4;
+  string remark = 5;
+  string user_id = 6;
+
+}
+
+message PaymentsParams {
+  FilterPaymentInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 user_ids = 6;
+  repeated int32 order_ids = 7;
+
+}
+
+message CreatePaymentInput {
+  int32 order_id = 1;
+  string code = 2;
+  int32 pay_method = 3;
+  string vouchers = 4;
+  string remark = 5;
+  int32 user_id = 6;
+
+  common.UserInfo user = 7;
+}
+
+message UpdatePaymentInput {
+  int32 order_id = 1;
+  string code = 2;
+  int32 pay_method = 3;
+  string vouchers = 4;
+  string remark = 5;
+  int32 user_id = 6;
+
+  common.UserInfo user = 7;
+  int32 id = 8;
+}
+
+message Payment {
+  int32 id = 1;
+  int32 order_id = 2;
+  string code = 3;
+  int32 pay_method = 4;
+  string vouchers = 5;
+  string remark = 6;
+  int32 user_id = 7;
+  admin.User user = 8;
+  rancher.Order order = 9;
+  int32 created_at = 10;
+  int32 updated_at = 11;
+
+}
+
+message Payments {
+  repeated Payment payments = 1;
+}
+
+message PaymentResult {
+  Payment payment = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterProductInput {
+  string code = 1;
+  string product_type_id = 2;
+  string name = 3;
+  string specification = 4;
+  string model_num = 5;
+  string calculate_method = 6;
+  string price = 7;
+  string images = 8;
+  string source = 9;
+  string user_id = 10;
+
+}
+
+message ProductsParams {
+  FilterProductInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 user_ids = 6;
+
+}
+
+message CreateProductInput {
+  string code = 1;
+  int32 product_type_id = 2;
+  string name = 3;
+  string specification = 4;
+  string model_num = 5;
+  int32 calculate_method = 6;
+  string price = 7;
+  string images = 8;
+  string source = 9;
+  int32 user_id = 10;
+
+  common.UserInfo user = 11;
+}
+
+message UpdateProductInput {
+  string code = 1;
+  int32 product_type_id = 2;
+  string name = 3;
+  string specification = 4;
+  string model_num = 5;
+  int32 calculate_method = 6;
+  string price = 7;
+  string images = 8;
+  string source = 9;
+  int32 user_id = 10;
+
+  common.UserInfo user = 11;
+  int32 id = 12;
+}
+
+message Product {
+  int32 id = 1;
+  string code = 2;
+  int32 product_type_id = 3;
+  string name = 4;
+  string specification = 5;
+  string model_num = 6;
+  int32 calculate_method = 7;
+  string price = 8;
+  string images = 9;
+  string source = 10;
+  int32 user_id = 11;
+  admin.User user = 12;
+  int32 created_at = 13;
+  int32 updated_at = 14;
+
+}
+
+message Products {
+  repeated Product products = 1;
+}
+
+message ProductResult {
+  Product product = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterCustomerInput {
+  string code = 1;
+  string house_id = 2;
+  string name = 3;
+  string cellphone = 4;
+  string wechatid = 5;
+  string title = 6;
+  string age = 7;
+  string sex = 8;
+  string identity = 9;
+  string education = 10;
+  string income = 11;
+
+}
+
+message CustomersParams {
+  FilterCustomerInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 house_ids = 6;
+
+}
+
+message CreateCustomerInput {
+  string code = 1;
+  int32 house_id = 2;
+  string name = 3;
+  string cellphone = 4;
+  string wechatid = 5;
+  string title = 6;
+  int32 age = 7;
+  string sex = 8;
+  string identity = 9;
+  string education = 10;
+  string income = 11;
+
+  common.UserInfo user = 12;
+}
+
+message UpdateCustomerInput {
+  string code = 1;
+  int32 house_id = 2;
+  string name = 3;
+  string cellphone = 4;
+  string wechatid = 5;
+  string title = 6;
+  int32 age = 7;
+  string sex = 8;
+  string identity = 9;
+  string education = 10;
+  string income = 11;
+
+  common.UserInfo user = 12;
+  int32 id = 13;
+}
+
+message Customer {
+  int32 id = 1;
+  string code = 2;
+  int32 house_id = 3;
+  string name = 4;
+  string cellphone = 5;
+  string wechatid = 6;
+  string title = 7;
+  int32 age = 8;
+  string sex = 9;
+  string identity = 10;
+  string education = 11;
+  string income = 12;
+  rancher.House house = 13;
+  int32 created_at = 14;
+  int32 updated_at = 15;
+
+}
+
+message Customers {
+  repeated Customer customers = 1;
+}
+
+message CustomerResult {
+  Customer customer = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterOrderPlanInput {
+  string order_id = 1;
+  string repo_product_id = 2;
+  string vendor_id = 3;
+  string logistics = 4;
+  string logistics_code = 5;
+  string worker_name = 6;
+  string worker_cellphone = 7;
+  string plan_deal_date = 8;
+  string actual_deal_date = 9;
+  string plan_install_date = 10;
+  string actual_install_date = 11;
+  string is_notify_vendor = 12;
+  string is_notify_customer = 13;
+  string is_notify_worker = 14;
+  string user_id = 15;
+  string status = 16;
+
+}
+
+message OrderPlansParams {
+  FilterOrderPlanInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 order_ids = 6;
+  repeated int32 repo_product_ids = 7;
+  repeated int32 vendor_ids = 8;
+  repeated int32 user_ids = 9;
+
+}
+
+message CreateOrderPlanInput {
+  int32 order_id = 1;
+  int32 repo_product_id = 2;
+  int32 vendor_id = 3;
+  string logistics = 4;
+  string logistics_code = 5;
+  string worker_name = 6;
+  string worker_cellphone = 7;
+  int32 plan_deal_date = 8;
+  int32 actual_deal_date = 9;
+  int32 plan_install_date = 10;
+  int32 actual_install_date = 11;
+  int32 is_notify_vendor = 12;
+  int32 is_notify_customer = 13;
+  int32 is_notify_worker = 14;
+  int32 user_id = 15;
+  int32 status = 16;
+
+  common.UserInfo user = 17;
+}
+
+message UpdateOrderPlanInput {
+  int32 order_id = 1;
+  int32 repo_product_id = 2;
+  int32 vendor_id = 3;
+  string logistics = 4;
+  string logistics_code = 5;
+  string worker_name = 6;
+  string worker_cellphone = 7;
+  int32 plan_deal_date = 8;
+  int32 actual_deal_date = 9;
+  int32 plan_install_date = 10;
+  int32 actual_install_date = 11;
+  int32 is_notify_vendor = 12;
+  int32 is_notify_customer = 13;
+  int32 is_notify_worker = 14;
+  int32 user_id = 15;
+  int32 status = 16;
+
+  common.UserInfo user = 17;
+  int32 id = 18;
+}
+
+message OrderPlan {
+  int32 id = 1;
+  int32 order_id = 2;
+  int32 repo_product_id = 3;
+  int32 vendor_id = 4;
+  string logistics = 5;
+  string logistics_code = 6;
+  string worker_name = 7;
+  string worker_cellphone = 8;
+  int32 plan_deal_date = 9;
+  int32 actual_deal_date = 10;
+  int32 plan_install_date = 11;
+  int32 actual_install_date = 12;
+  int32 is_notify_vendor = 13;
+  int32 is_notify_customer = 14;
+  int32 is_notify_worker = 15;
+  int32 user_id = 16;
+  int32 status = 17;
+  rancher.Order order = 18;
+  rancher.RepoProduct repo_product = 19;
+  rancher.Vendor vendor = 20;
+  admin.User user = 21;
+  int32 created_at = 22;
+  int32 updated_at = 23;
+
+}
+
+message OrderPlans {
+  repeated OrderPlan order_plans = 1;
+}
+
+message OrderPlanResult {
+  OrderPlan order_plan = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterBuildingInput {
+  string prompt_code = 1;
+  string name = 2;
+  string address = 3;
+  string lat = 4;
+  string lng = 5;
+  string user_id = 6;
+
+}
+
+message BuildingsParams {
+  FilterBuildingInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 user_ids = 6;
+
+}
+
+message CreateBuildingInput {
+  string prompt_code = 1;
+  string name = 2;
+  string address = 3;
+  string lat = 4;
+  string lng = 5;
+  int32 user_id = 6;
+
+  common.UserInfo user = 7;
+}
+
+message UpdateBuildingInput {
+  string prompt_code = 1;
+  string name = 2;
+  string address = 3;
+  string lat = 4;
+  string lng = 5;
+  int32 user_id = 6;
+
+  common.UserInfo user = 7;
+  int32 id = 8;
+}
+
+message Building {
+  int32 id = 1;
+  string prompt_code = 2;
+  string name = 3;
+  string address = 4;
+  string lat = 5;
+  string lng = 6;
+  int32 user_id = 7;
+  admin.User user = 8;
+  repeated rancher.Spec specs = 9;
+  int32 created_at = 10;
+  int32 updated_at = 11;
+
+}
+
+message Buildings {
+  repeated Building buildings = 1;
+}
+
+message BuildingResult {
+  Building building = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterRepoReviewInput {
+  string code = 1;
+  string reviewable_id = 2;
+  string reviewable_type = 3;
+  string user_id = 4;
+  string version = 5;
+
+}
+
+message RepoReviewsParams {
+  FilterRepoReviewInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+
+}
+
+message CreateRepoReviewInput {
+  string code = 1;
+  int32 reviewable_id = 2;
+  string reviewable_type = 3;
+  int32 user_id = 4;
+  string version = 5;
+
+  common.UserInfo user = 6;
+}
+
+message UpdateRepoReviewInput {
+  string code = 1;
+  int32 reviewable_id = 2;
+  string reviewable_type = 3;
+  int32 user_id = 4;
+  string version = 5;
+
+  common.UserInfo user = 6;
+  int32 id = 7;
+}
+
+message RepoReview {
+  int32 id = 1;
+  string code = 2;
+  int32 reviewable_id = 3;
+  string reviewable_type = 4;
+  int32 user_id = 5;
+  string version = 6;
+  repeated rancher.RepoReviewAssign repo_review_assigns = 7;
+  int32 created_at = 8;
+  int32 updated_at = 9;
+
+}
+
+message RepoReviews {
+  repeated RepoReview repo_reviews = 1;
+}
+
+message RepoReviewResult {
+  RepoReview repo_review = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterStoryInput {
+  string ticket_id = 1;
+  string customer_id = 2;
+  string user_id = 3;
+  string remark = 4;
+
+}
+
+message StoriesParams {
+  FilterStoryInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 ticket_ids = 6;
+  repeated int32 customer_ids = 7;
+  repeated int32 user_ids = 8;
+
+}
+
+message CreateStoryInput {
+  int32 ticket_id = 1;
+  int32 customer_id = 2;
+  int32 user_id = 3;
+  string remark = 4;
+
+  common.UserInfo user = 5;
+}
+
+message UpdateStoryInput {
+  int32 ticket_id = 1;
+  int32 customer_id = 2;
+  int32 user_id = 3;
+  string remark = 4;
+
+  common.UserInfo user = 5;
+  int32 id = 6;
+}
+
+message Story {
+  int32 id = 1;
+  int32 ticket_id = 2;
+  int32 customer_id = 3;
+  int32 user_id = 4;
+  string remark = 5;
+  rancher.Ticket ticket = 6;
+  rancher.Customer customer = 7;
+  admin.User user = 8;
+  int32 created_at = 9;
+  int32 updated_at = 10;
+
+}
+
+message Stories {
+  repeated Story stories = 1;
+}
+
+message StoryResult {
+  Story story = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterTaskInput {
+  string name = 1;
+  string targetable_id = 2;
+  string targetable_type = 3;
+  string status = 4;
+  string remark = 5;
+  string deadline_at = 6;
+  string user_id = 7;
+
+}
+
+message TasksParams {
+  FilterTaskInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 user_ids = 6;
+
+}
+
+message CreateTaskInput {
+  string name = 1;
+  int32 targetable_id = 2;
+  string targetable_type = 3;
+  string status = 4;
+  string remark = 5;
+  int32 deadline_at = 6;
+  int32 user_id = 7;
+
+  common.UserInfo user = 8;
+}
+
+message UpdateTaskInput {
+  string name = 1;
+  int32 targetable_id = 2;
+  string targetable_type = 3;
+  string status = 4;
+  string remark = 5;
+  int32 deadline_at = 6;
+  int32 user_id = 7;
+
+  common.UserInfo user = 8;
+  int32 id = 9;
+}
+
+message Task {
+  int32 id = 1;
+  string name = 2;
+  int32 targetable_id = 3;
+  string targetable_type = 4;
+  string status = 5;
+  string remark = 6;
+  int32 deadline_at = 7;
+  int32 user_id = 8;
+  admin.User user = 9;
+  int32 created_at = 10;
+  int32 updated_at = 11;
+
+}
+
+message Tasks {
+  repeated Task tasks = 1;
+}
+
+message TaskResult {
+  Task task = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterOrderSaleInput {
+  string order_id = 1;
+  string saled_type = 2;
+  string repo_product_id = 3;
+  string status = 4;
+  string remark = 5;
+  string expect_finish_date = 6;
+  string actual_finish_date = 7;
+  string vouchers = 8;
+  string user_id = 9;
+
+}
+
+message OrderSalesParams {
+  FilterOrderSaleInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 order_ids = 6;
+  repeated int32 repo_product_ids = 7;
+  repeated int32 user_ids = 8;
+
+}
+
+message CreateOrderSaleInput {
+  int32 order_id = 1;
+  int32 saled_type = 2;
+  int32 repo_product_id = 3;
+  int32 status = 4;
+  string remark = 5;
+  int32 expect_finish_date = 6;
+  int32 actual_finish_date = 7;
+  string vouchers = 8;
+  int32 user_id = 9;
+
+  common.UserInfo user = 10;
+}
+
+message UpdateOrderSaleInput {
+  int32 order_id = 1;
+  int32 saled_type = 2;
+  int32 repo_product_id = 3;
+  int32 status = 4;
+  string remark = 5;
+  int32 expect_finish_date = 6;
+  int32 actual_finish_date = 7;
+  string vouchers = 8;
+  int32 user_id = 9;
+
+  common.UserInfo user = 10;
+  int32 id = 11;
+}
+
+message OrderSale {
+  int32 id = 1;
+  int32 order_id = 2;
+  int32 saled_type = 3;
+  int32 repo_product_id = 4;
+  int32 status = 5;
+  string remark = 6;
+  int32 expect_finish_date = 7;
+  int32 actual_finish_date = 8;
+  string vouchers = 9;
+  int32 user_id = 10;
+  rancher.Order order = 11;
+  rancher.RepoProduct repo_product = 12;
+  admin.User user = 13;
+  int32 created_at = 14;
+  int32 updated_at = 15;
+
+}
+
+message OrderSales {
+  repeated OrderSale order_sales = 1;
+}
+
+message OrderSaleResult {
+  OrderSale order_sale = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterProductTypeInput {
+  string code = 1;
+  string name = 2;
+
+}
+
+message ProductTypesParams {
+  FilterProductTypeInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+
+}
+
+message CreateProductTypeInput {
+  string code = 1;
+  string name = 2;
+
+  common.UserInfo user = 3;
+}
+
+message UpdateProductTypeInput {
+  string code = 1;
+  string name = 2;
+
+  common.UserInfo user = 3;
+  int32 id = 4;
+}
+
+message ProductType {
+  int32 id = 1;
+  string code = 2;
+  string name = 3;
+  int32 created_at = 4;
+  int32 updated_at = 5;
+
+}
+
+message ProductTypes {
+  repeated ProductType product_types = 1;
+}
+
+message ProductTypeResult {
+  ProductType product_type = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterSpecInput {
+  string building_id = 1;
+  string name = 2;
+  string rough = 3;
+  string precise = 4;
+  string area = 5;
+  string user_id = 6;
+
+}
+
+message SpecsParams {
+  FilterSpecInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 user_ids = 6;
+  repeated int32 building_ids = 7;
+
+}
+
+message CreateSpecInput {
+  int32 building_id = 1;
+  string name = 2;
+  string rough = 3;
+  string precise = 4;
+  float area = 5;
+  int32 user_id = 6;
+
+  common.UserInfo user = 7;
+}
+
+message UpdateSpecInput {
+  int32 building_id = 1;
+  string name = 2;
+  string rough = 3;
+  string precise = 4;
+  float area = 5;
+  int32 user_id = 6;
+
+  common.UserInfo user = 7;
+  int32 id = 8;
+}
+
+message Spec {
+  int32 id = 1;
+  int32 building_id = 2;
+  string name = 3;
+  string rough = 4;
+  string precise = 5;
+  float area = 6;
+  int32 user_id = 7;
+  admin.User user = 8;
+  rancher.Building building = 9;
+  repeated rancher.Quote quotes = 10;
+  repeated rancher.Room rooms = 11;
+  repeated rancher.House houses = 12;
+  int32 created_at = 13;
+  int32 updated_at = 14;
+
+}
+
+message Specs {
+  repeated Spec specs = 1;
+}
+
+message SpecResult {
+  Spec spec = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterVendorInput {
+  string code = 1;
+  string prompt_code = 2;
+  string name = 3;
+  string address = 4;
+  string contact = 5;
+  string cellphone = 6;
+
+}
+
+message VendorsParams {
+  FilterVendorInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+
+}
+
+message CreateVendorInput {
+  string code = 1;
+  string prompt_code = 2;
+  string name = 3;
+  string address = 4;
+  string contact = 5;
+  string cellphone = 6;
+
+  common.UserInfo user = 7;
+}
+
+message UpdateVendorInput {
+  string code = 1;
+  string prompt_code = 2;
+  string name = 3;
+  string address = 4;
+  string contact = 5;
+  string cellphone = 6;
+
+  common.UserInfo user = 7;
+  int32 id = 8;
+}
+
+message Vendor {
+  int32 id = 1;
+  string code = 2;
+  string prompt_code = 3;
+  string name = 4;
+  string address = 5;
+  string contact = 6;
+  string cellphone = 7;
+  int32 created_at = 8;
+  int32 updated_at = 9;
+
+}
+
+message Vendors {
+  repeated Vendor vendors = 1;
+}
+
+message VendorResult {
+  Vendor vendor = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterVendorScoreInput {
+  string vendor_id = 1;
+  string vendor_dimension_id = 2;
+  string score = 3;
+  string user_id = 4;
+
+}
+
+message VendorScoresParams {
+  FilterVendorScoreInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 vendor_ids = 6;
+  repeated int32 user_ids = 7;
+
+}
+
+message CreateVendorScoreInput {
+  int32 vendor_id = 1;
+  int32 vendor_dimension_id = 2;
+  int32 score = 3;
+  int32 user_id = 4;
+
+  common.UserInfo user = 5;
+}
+
+message UpdateVendorScoreInput {
+  int32 vendor_id = 1;
+  int32 vendor_dimension_id = 2;
+  int32 score = 3;
+  int32 user_id = 4;
+
+  common.UserInfo user = 5;
+  int32 id = 6;
+}
+
+message VendorScore {
+  int32 id = 1;
+  int32 vendor_id = 2;
+  int32 vendor_dimension_id = 3;
+  int32 score = 4;
+  int32 user_id = 5;
+  rancher.Vendor vendor = 6;
+  admin.User user = 7;
+  int32 created_at = 8;
+  int32 updated_at = 9;
+
+}
+
+message VendorScores {
+  repeated VendorScore vendor_scores = 1;
+}
+
+message VendorScoreResult {
+  VendorScore vendor_score = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterVendorDimensionInput {
+  string code = 1;
+  string name = 2;
+
+}
+
+message VendorDimensionsParams {
+  FilterVendorDimensionInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+
+}
+
+message CreateVendorDimensionInput {
+  string code = 1;
+  string name = 2;
+
+  common.UserInfo user = 3;
+}
+
+message UpdateVendorDimensionInput {
+  string code = 1;
+  string name = 2;
+
+  common.UserInfo user = 3;
+  int32 id = 4;
+}
+
+message VendorDimension {
+  int32 id = 1;
+  string code = 2;
+  string name = 3;
+  int32 created_at = 4;
+  int32 updated_at = 5;
+
+}
+
+message VendorDimensions {
+  repeated VendorDimension vendor_dimensions = 1;
+}
+
+message VendorDimensionResult {
+  VendorDimension vendor_dimension = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterWorkFlowApplyInput {
+  string work_flow_id = 1;
+  string user_id = 2;
+  string cur_node_id = 3;
+  string status = 4;
+  string priority = 5;
+
+}
+
+message WorkFlowAppliesParams {
+  FilterWorkFlowApplyInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 work_flow_ids = 6;
+  repeated int32 user_ids = 7;
+
+}
+
+message CreateWorkFlowApplyInput {
+  int32 work_flow_id = 1;
+  int32 user_id = 2;
+  int32 cur_node_id = 3;
+  int32 status = 4;
+  int32 priority = 5;
+
+  common.UserInfo user = 6;
+}
+
+message UpdateWorkFlowApplyInput {
+  int32 work_flow_id = 1;
+  int32 user_id = 2;
+  int32 cur_node_id = 3;
+  int32 status = 4;
+  int32 priority = 5;
+
+  common.UserInfo user = 6;
+  int32 id = 7;
+}
+
+message WorkFlowApply {
+  int32 id = 1;
+  int32 work_flow_id = 2;
+  int32 user_id = 3;
+  int32 cur_node_id = 4;
+  int32 status = 5;
+  int32 priority = 6;
+  rancher.WorkFlow work_flow = 7;
+  admin.User user = 8;
+  int32 created_at = 9;
+  int32 updated_at = 10;
+
+}
+
+message WorkFlowApplies {
+  repeated WorkFlowApply work_flow_applies = 1;
+}
+
+message WorkFlowApplyResult {
+  WorkFlowApply work_flow_apply = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterWorkFlowNodeBranchInput {
+  string work_flow_node_id = 1;
+  string name = 2;
+
+}
+
+message WorkFlowNodeBranchesParams {
+  FilterWorkFlowNodeBranchInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 work_flow_node_ids = 6;
+
+}
+
+message CreateWorkFlowNodeBranchInput {
+  int32 work_flow_node_id = 1;
+  string name = 2;
+
+  common.UserInfo user = 3;
+}
+
+message UpdateWorkFlowNodeBranchInput {
+  int32 work_flow_node_id = 1;
+  string name = 2;
+
+  common.UserInfo user = 3;
+  int32 id = 4;
+}
+
+message WorkFlowNodeBranch {
+  int32 id = 1;
+  int32 work_flow_node_id = 2;
+  string name = 3;
+  rancher.WorkFlowNode work_flow_node = 4;
+  int32 created_at = 5;
+  int32 updated_at = 6;
+
+}
+
+message WorkFlowNodeBranches {
+  repeated WorkFlowNodeBranch work_flow_node_branches = 1;
+}
+
+message WorkFlowNodeBranchResult {
+  WorkFlowNodeBranch work_flow_node_branch = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterWorkFlowNodeInput {
+  string work_flow_id = 1;
+  string name = 2;
+  string prev_node_id = 3;
+  string next_node_id = 4;
+  string failed_transition_node_id = 5;
+  string node_type = 6;
+  string node_func_type = 7;
+  string node_func_class_name = 8;
+  string order = 9;
+  string has_branches = 10;
+
+}
+
+message WorkFlowNodesParams {
+  FilterWorkFlowNodeInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 work_flow_ids = 6;
+
+}
+
+message CreateWorkFlowNodeInput {
+  int32 work_flow_id = 1;
+  string name = 2;
+  int32 prev_node_id = 3;
+  int32 next_node_id = 4;
+  int32 failed_transition_node_id = 5;
+  int32 node_type = 6;
+  int32 node_func_type = 7;
+  string node_func_class_name = 8;
+  int32 order = 9;
+  bool has_branches = 10;
+
+  common.UserInfo user = 11;
+}
+
+message UpdateWorkFlowNodeInput {
+  int32 work_flow_id = 1;
+  string name = 2;
+  int32 prev_node_id = 3;
+  int32 next_node_id = 4;
+  int32 failed_transition_node_id = 5;
+  int32 node_type = 6;
+  int32 node_func_type = 7;
+  string node_func_class_name = 8;
+  int32 order = 9;
+  bool has_branches = 10;
+
+  common.UserInfo user = 11;
+  int32 id = 12;
+}
+
+message WorkFlowNode {
+  int32 id = 1;
+  int32 work_flow_id = 2;
+  string name = 3;
+  int32 prev_node_id = 4;
+  int32 next_node_id = 5;
+  int32 failed_transition_node_id = 6;
+  int32 node_type = 7;
+  int32 node_func_type = 8;
+  string node_func_class_name = 9;
+  int32 order = 10;
+  bool has_branches = 11;
+  rancher.WorkFlow work_flow = 12;
+  int32 created_at = 13;
+  int32 updated_at = 14;
+
+}
+
+message WorkFlowNodes {
+  repeated WorkFlowNode work_flow_nodes = 1;
+}
+
+message WorkFlowNodeResult {
+  WorkFlowNode work_flow_node = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterWorkFlowProcessInput {
+  string work_flow_apply_id = 1;
+  string work_flow_node_id = 2;
+  string work_flow_node_branch_id = 3;
+  string operation = 4;
+  string reason = 5;
+
+}
+
+message WorkFlowProcessesParams {
+  FilterWorkFlowProcessInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 work_flow_apply_ids = 6;
+  repeated int32 work_flow_node_ids = 7;
+  repeated int32 work_flow_node_branch_ids = 8;
+
+}
+
+message CreateWorkFlowProcessInput {
+  int32 work_flow_apply_id = 1;
+  int32 work_flow_node_id = 2;
+  int32 work_flow_node_branch_id = 3;
+  int32 operation = 4;
+  string reason = 5;
+
+  common.UserInfo user = 6;
+}
+
+message UpdateWorkFlowProcessInput {
+  int32 work_flow_apply_id = 1;
+  int32 work_flow_node_id = 2;
+  int32 work_flow_node_branch_id = 3;
+  int32 operation = 4;
+  string reason = 5;
+
+  common.UserInfo user = 6;
+  int32 id = 7;
+}
+
+message WorkFlowProcess {
+  int32 id = 1;
+  int32 work_flow_apply_id = 2;
+  int32 work_flow_node_id = 3;
+  int32 work_flow_node_branch_id = 4;
+  int32 operation = 5;
+  string reason = 6;
+  rancher.WorkFlowApply work_flow_apply = 7;
+  rancher.WorkFlowNode work_flow_node = 8;
+  rancher.WorkFlowNodeBranch work_flow_node_branch = 9;
+  int32 created_at = 10;
+  int32 updated_at = 11;
+
+}
+
+message WorkFlowProcesses {
+  repeated WorkFlowProcess work_flow_processes = 1;
+}
+
+message WorkFlowProcessResult {
+  WorkFlowProcess work_flow_process = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterWorkFlowInput {
+  string code = 1;
+  string name = 2;
+  string workable_id = 3;
+  string workable_type = 4;
+  string remark = 5;
+
+}
+
+message WorkFlowsParams {
+  FilterWorkFlowInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+
+}
+
+message CreateWorkFlowInput {
+  string code = 1;
+  string name = 2;
+  int32 workable_id = 3;
+  string workable_type = 4;
+  string remark = 5;
+
+  common.UserInfo user = 6;
+}
+
+message UpdateWorkFlowInput {
+  string code = 1;
+  string name = 2;
+  int32 workable_id = 3;
+  string workable_type = 4;
+  string remark = 5;
+
+  common.UserInfo user = 6;
+  int32 id = 7;
+}
+
+message WorkFlow {
+  int32 id = 1;
+  string code = 2;
+  string name = 3;
+  int32 workable_id = 4;
+  string workable_type = 5;
+  string remark = 6;
+  repeated rancher.WorkFlowNode work_flow_nodes = 7;
+  repeated rancher.WorkFlowApply work_flow_applies = 8;
+  int32 created_at = 9;
+  int32 updated_at = 10;
+
+}
+
+message WorkFlows {
+  repeated WorkFlow work_flows = 1;
+}
+
+message WorkFlowResult {
+  WorkFlow work_flow = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+message FilterOrderBillInput {
+  string order_id = 1;
+  string code = 2;
+  string amount = 3;
+  string amount_cn = 4;
+  string direction = 5;
+  string billable_id = 6;
+  string billable_type = 7;
+  string remark = 8;
+
+}
+
+message OrderBillsParams {
+  FilterOrderBillInput filter = 1;
+  repeated common.OrderItem order = 2;
+  common.PaginateInput paginate = 3;
+  common.UserInfo user = 4;
+  repeated int32 ids = 5;
+  repeated int32 order_ids = 6;
+
+}
+
+message CreateOrderBillInput {
+  int32 order_id = 1;
+  string code = 2;
+  string amount = 3;
+  string amount_cn = 4;
+  int32 direction = 5;
+  int32 billable_id = 6;
+  string billable_type = 7;
+  string remark = 8;
+
+  common.UserInfo user = 9;
+}
+
+message UpdateOrderBillInput {
+  int32 order_id = 1;
+  string code = 2;
+  string amount = 3;
+  string amount_cn = 4;
+  int32 direction = 5;
+  int32 billable_id = 6;
+  string billable_type = 7;
+  string remark = 8;
+
+  common.UserInfo user = 9;
+  int32 id = 10;
+}
+
+message OrderBill {
+  int32 id = 1;
+  int32 order_id = 2;
+  string code = 3;
+  string amount = 4;
+  string amount_cn = 5;
+  int32 direction = 6;
+  int32 billable_id = 7;
+  string billable_type = 8;
+  string remark = 9;
+  rancher.Order order = 10;
+  int32 created_at = 11;
+  int32 updated_at = 12;
+
+}
+
+message OrderBills {
+  repeated OrderBill order_bills = 1;
+}
+
+message OrderBillResult {
+  OrderBill order_bill = 1;
+  repeated common.NormalError errors = 2;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+service Rancher {
+
+  rpc ListRepo(common.ID) returns (Repo) {}
+rpc ListRepos(ReposParams) returns (Repos) {}
+rpc CreateRepo(CreateRepoInput) returns (RepoResult) {}
+rpc UpdateRepo(UpdateRepoInput) returns (RepoResult) {}
+rpc DeleteRepo(common.ID) returns (common.ActionResult) {}
+
+  rpc ListRoom(common.ID) returns (Room) {}
+rpc ListRooms(RoomsParams) returns (Rooms) {}
+rpc CreateRoom(CreateRoomInput) returns (RoomResult) {}
+rpc UpdateRoom(UpdateRoomInput) returns (RoomResult) {}
+rpc DeleteRoom(common.ID) returns (common.ActionResult) {}
+
+  rpc ListSaledReview(common.ID) returns (SaledReview) {}
+rpc ListSaledReviews(SaledReviewsParams) returns (SaledReviews) {}
+rpc CreateSaledReview(CreateSaledReviewInput) returns (SaledReviewResult) {}
+rpc UpdateSaledReview(UpdateSaledReviewInput) returns (SaledReviewResult) {}
+rpc DeleteSaledReview(common.ID) returns (common.ActionResult) {}
+
+  rpc ListQuote(common.ID) returns (Quote) {}
+rpc ListQuotes(QuotesParams) returns (Quotes) {}
+rpc CreateQuote(CreateQuoteInput) returns (QuoteResult) {}
+rpc UpdateQuote(UpdateQuoteInput) returns (QuoteResult) {}
+rpc DeleteQuote(common.ID) returns (common.ActionResult) {}
+
+  rpc ListTicket(common.ID) returns (Ticket) {}
+rpc ListTickets(TicketsParams) returns (Tickets) {}
+rpc CreateTicket(CreateTicketInput) returns (TicketResult) {}
+rpc UpdateTicket(UpdateTicketInput) returns (TicketResult) {}
+rpc DeleteTicket(common.ID) returns (common.ActionResult) {}
+
+  rpc ListTrace(common.ID) returns (Trace) {}
+rpc ListTraces(TracesParams) returns (Traces) {}
+rpc CreateTrace(CreateTraceInput) returns (TraceResult) {}
+rpc UpdateTrace(UpdateTraceInput) returns (TraceResult) {}
+rpc DeleteTrace(common.ID) returns (common.ActionResult) {}
+
+  rpc ListOrder(common.ID) returns (Order) {}
+rpc ListOrders(OrdersParams) returns (Orders) {}
+rpc CreateOrder(CreateOrderInput) returns (OrderResult) {}
+rpc UpdateOrder(UpdateOrderInput) returns (OrderResult) {}
+rpc DeleteOrder(common.ID) returns (common.ActionResult) {}
+
+  rpc ListOrderDealPlan(common.ID) returns (OrderDealPlan) {}
+rpc ListOrderDealPlans(OrderDealPlansParams) returns (OrderDealPlans) {}
+rpc CreateOrderDealPlan(CreateOrderDealPlanInput) returns (OrderDealPlanResult) {}
+rpc UpdateOrderDealPlan(UpdateOrderDealPlanInput) returns (OrderDealPlanResult) {}
+rpc DeleteOrderDealPlan(common.ID) returns (common.ActionResult) {}
+
+  rpc ListOrderDeal(common.ID) returns (OrderDeal) {}
+rpc ListOrderDeals(OrderDealsParams) returns (OrderDeals) {}
+rpc CreateOrderDeal(CreateOrderDealInput) returns (OrderDealResult) {}
+rpc UpdateOrderDeal(UpdateOrderDealInput) returns (OrderDealResult) {}
+rpc DeleteOrderDeal(common.ID) returns (common.ActionResult) {}
+
+  rpc ListOrderPurchasePlan(common.ID) returns (OrderPurchasePlan) {}
+rpc ListOrderPurchasePlans(OrderPurchasePlansParams) returns (OrderPurchasePlans) {}
+rpc CreateOrderPurchasePlan(CreateOrderPurchasePlanInput) returns (OrderPurchasePlanResult) {}
+rpc UpdateOrderPurchasePlan(UpdateOrderPurchasePlanInput) returns (OrderPurchasePlanResult) {}
+rpc DeleteOrderPurchasePlan(common.ID) returns (common.ActionResult) {}
+
+  rpc ListRepoProduct(common.ID) returns (RepoProduct) {}
+rpc ListRepoProducts(RepoProductsParams) returns (RepoProducts) {}
+rpc CreateRepoProduct(CreateRepoProductInput) returns (RepoProductResult) {}
+rpc UpdateRepoProduct(UpdateRepoProductInput) returns (RepoProductResult) {}
+rpc DeleteRepoProduct(common.ID) returns (common.ActionResult) {}
+
+  rpc ListRepoReviewAssign(common.ID) returns (RepoReviewAssign) {}
+rpc ListRepoReviewAssigns(RepoReviewAssignsParams) returns (RepoReviewAssigns) {}
+rpc CreateRepoReviewAssign(CreateRepoReviewAssignInput) returns (RepoReviewAssignResult) {}
+rpc UpdateRepoReviewAssign(UpdateRepoReviewAssignInput) returns (RepoReviewAssignResult) {}
+rpc DeleteRepoReviewAssign(common.ID) returns (common.ActionResult) {}
+
+  rpc ListCase(common.ID) returns (Case) {}
+rpc ListCases(CasesParams) returns (Cases) {}
+rpc CreateCase(CreateCaseInput) returns (CaseResult) {}
+rpc UpdateCase(UpdateCaseInput) returns (CaseResult) {}
+rpc DeleteCase(common.ID) returns (common.ActionResult) {}
+
+  rpc ListHouse(common.ID) returns (House) {}
+rpc ListHouses(HousesParams) returns (Houses) {}
+rpc CreateHouse(CreateHouseInput) returns (HouseResult) {}
+rpc UpdateHouse(UpdateHouseInput) returns (HouseResult) {}
+rpc DeleteHouse(common.ID) returns (common.ActionResult) {}
+
+  rpc ListMessage(common.ID) returns (Message) {}
+rpc ListMessages(MessagesParams) returns (Messages) {}
+rpc CreateMessage(CreateMessageInput) returns (MessageResult) {}
+rpc UpdateMessage(UpdateMessageInput) returns (MessageResult) {}
+rpc DeleteMessage(common.ID) returns (common.ActionResult) {}
+
+  rpc ListPayment(common.ID) returns (Payment) {}
+rpc ListPayments(PaymentsParams) returns (Payments) {}
+rpc CreatePayment(CreatePaymentInput) returns (PaymentResult) {}
+rpc UpdatePayment(UpdatePaymentInput) returns (PaymentResult) {}
+rpc DeletePayment(common.ID) returns (common.ActionResult) {}
+
+  rpc ListProduct(common.ID) returns (Product) {}
+rpc ListProducts(ProductsParams) returns (Products) {}
+rpc CreateProduct(CreateProductInput) returns (ProductResult) {}
+rpc UpdateProduct(UpdateProductInput) returns (ProductResult) {}
+rpc DeleteProduct(common.ID) returns (common.ActionResult) {}
+
+  rpc ListCustomer(common.ID) returns (Customer) {}
+rpc ListCustomers(CustomersParams) returns (Customers) {}
+rpc CreateCustomer(CreateCustomerInput) returns (CustomerResult) {}
+rpc UpdateCustomer(UpdateCustomerInput) returns (CustomerResult) {}
+rpc DeleteCustomer(common.ID) returns (common.ActionResult) {}
+
+  rpc ListOrderPlan(common.ID) returns (OrderPlan) {}
+rpc ListOrderPlans(OrderPlansParams) returns (OrderPlans) {}
+rpc CreateOrderPlan(CreateOrderPlanInput) returns (OrderPlanResult) {}
+rpc UpdateOrderPlan(UpdateOrderPlanInput) returns (OrderPlanResult) {}
+rpc DeleteOrderPlan(common.ID) returns (common.ActionResult) {}
+
+  rpc ListBuilding(common.ID) returns (Building) {}
+rpc ListBuildings(BuildingsParams) returns (Buildings) {}
+rpc CreateBuilding(CreateBuildingInput) returns (BuildingResult) {}
+rpc UpdateBuilding(UpdateBuildingInput) returns (BuildingResult) {}
+rpc DeleteBuilding(common.ID) returns (common.ActionResult) {}
+
+  rpc ListRepoReview(common.ID) returns (RepoReview) {}
+rpc ListRepoReviews(RepoReviewsParams) returns (RepoReviews) {}
+rpc CreateRepoReview(CreateRepoReviewInput) returns (RepoReviewResult) {}
+rpc UpdateRepoReview(UpdateRepoReviewInput) returns (RepoReviewResult) {}
+rpc DeleteRepoReview(common.ID) returns (common.ActionResult) {}
+
+  rpc ListStory(common.ID) returns (Story) {}
+rpc ListStories(StoriesParams) returns (Stories) {}
+rpc CreateStory(CreateStoryInput) returns (StoryResult) {}
+rpc UpdateStory(UpdateStoryInput) returns (StoryResult) {}
+rpc DeleteStory(common.ID) returns (common.ActionResult) {}
+
+  rpc ListTask(common.ID) returns (Task) {}
+rpc ListTasks(TasksParams) returns (Tasks) {}
+rpc CreateTask(CreateTaskInput) returns (TaskResult) {}
+rpc UpdateTask(UpdateTaskInput) returns (TaskResult) {}
+rpc DeleteTask(common.ID) returns (common.ActionResult) {}
+
+  rpc ListOrderSale(common.ID) returns (OrderSale) {}
+rpc ListOrderSales(OrderSalesParams) returns (OrderSales) {}
+rpc CreateOrderSale(CreateOrderSaleInput) returns (OrderSaleResult) {}
+rpc UpdateOrderSale(UpdateOrderSaleInput) returns (OrderSaleResult) {}
+rpc DeleteOrderSale(common.ID) returns (common.ActionResult) {}
+
+  rpc ListProductType(common.ID) returns (ProductType) {}
+rpc ListProductTypes(ProductTypesParams) returns (ProductTypes) {}
+rpc CreateProductType(CreateProductTypeInput) returns (ProductTypeResult) {}
+rpc UpdateProductType(UpdateProductTypeInput) returns (ProductTypeResult) {}
+rpc DeleteProductType(common.ID) returns (common.ActionResult) {}
+
+  rpc ListSpec(common.ID) returns (Spec) {}
+rpc ListSpecs(SpecsParams) returns (Specs) {}
+rpc CreateSpec(CreateSpecInput) returns (SpecResult) {}
+rpc UpdateSpec(UpdateSpecInput) returns (SpecResult) {}
+rpc DeleteSpec(common.ID) returns (common.ActionResult) {}
+
+  rpc ListVendor(common.ID) returns (Vendor) {}
+rpc ListVendors(VendorsParams) returns (Vendors) {}
+rpc CreateVendor(CreateVendorInput) returns (VendorResult) {}
+rpc UpdateVendor(UpdateVendorInput) returns (VendorResult) {}
+rpc DeleteVendor(common.ID) returns (common.ActionResult) {}
+
+  rpc ListVendorScore(common.ID) returns (VendorScore) {}
+rpc ListVendorScores(VendorScoresParams) returns (VendorScores) {}
+rpc CreateVendorScore(CreateVendorScoreInput) returns (VendorScoreResult) {}
+rpc UpdateVendorScore(UpdateVendorScoreInput) returns (VendorScoreResult) {}
+rpc DeleteVendorScore(common.ID) returns (common.ActionResult) {}
+
+  rpc ListVendorDimension(common.ID) returns (VendorDimension) {}
+rpc ListVendorDimensions(VendorDimensionsParams) returns (VendorDimensions) {}
+rpc CreateVendorDimension(CreateVendorDimensionInput) returns (VendorDimensionResult) {}
+rpc UpdateVendorDimension(UpdateVendorDimensionInput) returns (VendorDimensionResult) {}
+rpc DeleteVendorDimension(common.ID) returns (common.ActionResult) {}
+
+  rpc ListWorkFlowApply(common.ID) returns (WorkFlowApply) {}
+rpc ListWorkFlowApplies(WorkFlowAppliesParams) returns (WorkFlowApplies) {}
+rpc CreateWorkFlowApply(CreateWorkFlowApplyInput) returns (WorkFlowApplyResult) {}
+rpc UpdateWorkFlowApply(UpdateWorkFlowApplyInput) returns (WorkFlowApplyResult) {}
+rpc DeleteWorkFlowApply(common.ID) returns (common.ActionResult) {}
+
+  rpc ListWorkFlowNodeBranch(common.ID) returns (WorkFlowNodeBranch) {}
+rpc ListWorkFlowNodeBranches(WorkFlowNodeBranchesParams) returns (WorkFlowNodeBranches) {}
+rpc CreateWorkFlowNodeBranch(CreateWorkFlowNodeBranchInput) returns (WorkFlowNodeBranchResult) {}
+rpc UpdateWorkFlowNodeBranch(UpdateWorkFlowNodeBranchInput) returns (WorkFlowNodeBranchResult) {}
+rpc DeleteWorkFlowNodeBranch(common.ID) returns (common.ActionResult) {}
+
+  rpc ListWorkFlowNode(common.ID) returns (WorkFlowNode) {}
+rpc ListWorkFlowNodes(WorkFlowNodesParams) returns (WorkFlowNodes) {}
+rpc CreateWorkFlowNode(CreateWorkFlowNodeInput) returns (WorkFlowNodeResult) {}
+rpc UpdateWorkFlowNode(UpdateWorkFlowNodeInput) returns (WorkFlowNodeResult) {}
+rpc DeleteWorkFlowNode(common.ID) returns (common.ActionResult) {}
+
+  rpc ListWorkFlowProcess(common.ID) returns (WorkFlowProcess) {}
+rpc ListWorkFlowProcesses(WorkFlowProcessesParams) returns (WorkFlowProcesses) {}
+rpc CreateWorkFlowProcess(CreateWorkFlowProcessInput) returns (WorkFlowProcessResult) {}
+rpc UpdateWorkFlowProcess(UpdateWorkFlowProcessInput) returns (WorkFlowProcessResult) {}
+rpc DeleteWorkFlowProcess(common.ID) returns (common.ActionResult) {}
+
+  rpc ListWorkFlow(common.ID) returns (WorkFlow) {}
+rpc ListWorkFlows(WorkFlowsParams) returns (WorkFlows) {}
+rpc CreateWorkFlow(CreateWorkFlowInput) returns (WorkFlowResult) {}
+rpc UpdateWorkFlow(UpdateWorkFlowInput) returns (WorkFlowResult) {}
+rpc DeleteWorkFlow(common.ID) returns (common.ActionResult) {}
+
+  rpc ListOrderBill(common.ID) returns (OrderBill) {}
+rpc ListOrderBills(OrderBillsParams) returns (OrderBills) {}
+rpc CreateOrderBill(CreateOrderBillInput) returns (OrderBillResult) {}
+rpc UpdateOrderBill(UpdateOrderBillInput) returns (OrderBillResult) {}
+rpc DeleteOrderBill(common.ID) returns (common.ActionResult) {}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}

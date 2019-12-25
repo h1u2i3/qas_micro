@@ -16,17 +16,19 @@ defmodule QasMicro.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger],
-      mod: {QasMicro.Application, []}
+      extra_applications: [:logger]
     ]
   end
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:grpc, github: "elixir-grpc/grpc"},
+      {:jason, "~> 1.1"},
       {:inflex, "~> 2.0"},
       {:yacto, github: "gumi/yacto"},
       {:plug_cowboy, "~> 2.0"},
+      {:geo_postgis, "~> 3.1"},
 
       # deps fix
       {:cowlib, ~r/.*/,
