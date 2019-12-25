@@ -3,32 +3,11 @@ defmodule QasMicro.Code.Worker do
   alias QasCore.Code.Server
   alias QasCore.Code.Middleware.CodeClean
 
-  alias QasMicro.Code.Middleware.{
-    Database,
-    Model,
-    Graphql,
-    Plugin,
-    Wechat,
-    Callback,
-    Global,
-    Api,
-    App
-  }
+  alias QasMicro.Code.Middleware.{Database, Model}
 
   alias QasMicro.Config.Worker, as: ConfigWorker
 
-  @middlewares [
-    CodeClean,
-    Database,
-    Model,
-    Graphql,
-    Plugin,
-    Wechat,
-    Callback,
-    Global,
-    Api,
-    App
-  ]
+  @middlewares [CodeClean, Database, Model]
 
   def render(%Pipeline{assigns: %{app: app, config_module: _config_module} = assigns}) do
     Server.render(app, @middlewares, %{assign: assigns})

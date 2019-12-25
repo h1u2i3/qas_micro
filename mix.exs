@@ -23,7 +23,27 @@ defmodule QasMicro.MixProject do
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
-    []
+    [
+      {:inflex, "~> 2.0"},
+      {:yacto, github: "gumi/yacto"},
+      {:plug_cowboy, "~> 2.0"},
+
+      # deps fix
+      {:cowlib, ~r/.*/,
+       [
+         env: :prod,
+         override: true,
+         git: "https://github.com/elixir-grpc/cowlib.git",
+         tag: "grpc-2.7.3"
+       ]},
+      {:cowboy,
+       [
+         env: :prod,
+         override: true,
+         git: "https://github.com/elixir-grpc/cowboy.git",
+         tag: "grpc-2.6.3"
+       ]}
+    ]
   end
 
   defp append_revision(version) do

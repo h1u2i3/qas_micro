@@ -1,9 +1,0 @@
-defmodule <%= abilities_module_name %> do
-  alias Ecto.Changeset
-
-  def can?(_, _, _action, nil), do: true
-  <%= for permission <- permissions, item <- permission do %>
-  <%= item %>
-  <% end %>
-  def can?(_, _, _, _), do: false
-end

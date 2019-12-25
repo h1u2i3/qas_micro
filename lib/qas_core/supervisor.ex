@@ -1,9 +1,11 @@
-defmodule QasCore.Application do
-  use Application
+defmodule QasCore.Supervisor do
+  use Supervisor
 
-  def start(_type, _args) do
-    import Supervisor.Spec, warn: false
+  def start_link do
+    Supervisor.start_link(__MODULE__, [], name: __MODULE__)
+  end
 
+  def init(_) do
     children = [
       # Pid cache use ets
       QasCore.Cache,
@@ -19,8 +21,8 @@ defmodule QasCore.Application do
       {Task.Supervisor, name: QasCore.TaskSupervisor}
     ]
 
-    opts = [strategy: :one_for_one, name: QasCore.Supervisor, restart: :permanent]
+    opts = [strategy: :one_for_one, restart: :permanent]
 
-    Supervisor.start_link(children, opts)
+    Supervisor.init(children, opts)
   end
 end

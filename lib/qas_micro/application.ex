@@ -5,7 +5,7 @@ defmodule QasMicro.Application do
     import Supervisor.Spec, warn: false
 
     children = [
-      QasCore.Application
+      supervisor(QasCore.Supervisor, [])
     ]
 
     opts = [strategy: :one_for_one, name: QasMicro.Supervisor, restart: :permanent]

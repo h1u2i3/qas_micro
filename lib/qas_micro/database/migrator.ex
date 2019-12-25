@@ -5,8 +5,7 @@ defmodule QasMicro.Database.Migrator do
         Code.compiler_options(ignore_module_conflict: true)
         # find all migrations
         migrations =
-          :qas
-          |> Yacto.Migration.Util.get_migration_files(migration_folder)
+          Yacto.Migration.Util.get_migration_files(migration_folder)
           |> Yacto.Migration.Util.load_migrations()
 
         # add post gis extension
