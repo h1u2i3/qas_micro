@@ -7,4 +7,5 @@ erl_crash.dump
 *.ez
 qas_core-*.tar
 /src/*.erl
-
+/lib/account/
+/lib/grpc/
