@@ -32,20 +32,20 @@ defmodule QasMicro.Generator.Grpc do
 
     if auth_enabled do
       """
-      defdelegate list_#{object_name}(common_id, _stream),                to: #{model_module}
-      defdelegate list_#{Inflex.pluralize(object_name)}(params, _stream), to: #{model_module}
-      defdelegate create_#{object_name}(create_input, _stream),           to: #{model_module}
-      defdelegate update_#{object_name}(update_input, _stream),           to: #{model_module}
-      defdelegate delete_#{object_name}(common_id, _stream),              to: #{model_module}
-      defdelegate create_auth_#{object_name}(input, _stream),             to: #{model_module}
+      defdelegate list_#{object_name}(common_id, stream),                to: #{model_module}
+      defdelegate list_#{Inflex.pluralize(object_name)}(params, stream), to: #{model_module}
+      defdelegate create_#{object_name}(create_input, stream),           to: #{model_module}
+      defdelegate update_#{object_name}(update_input, stream),           to: #{model_module}
+      defdelegate delete_#{object_name}(common_id, stream),              to: #{model_module}
+      defdelegate create_auth_#{object_name}(input, stream),             to: #{model_module}
       """
     else
       """
-      defdelegate list_#{object_name}(common_id, _stream),                to: #{model_module}
-      defdelegate list_#{Inflex.pluralize(object_name)}(params, _stream), to: #{model_module}
-      defdelegate create_#{object_name}(create_input, _stream),           to: #{model_module}
-      defdelegate update_#{object_name}(update_input, _stream),           to: #{model_module}
-      defdelegate delete_#{object_name}(common_id, _stream),              to: #{model_module}
+      defdelegate list_#{object_name}(common_id, stream),                to: #{model_module}
+      defdelegate list_#{Inflex.pluralize(object_name)}(params, stream), to: #{model_module}
+      defdelegate create_#{object_name}(create_input, stream),           to: #{model_module}
+      defdelegate update_#{object_name}(update_input, stream),           to: #{model_module}
+      defdelegate delete_#{object_name}(common_id, stream),              to: #{model_module}
       """
     end
   end

@@ -1,5 +1,6 @@
 @name(account)
 @database_name(account)
+@otp_app(account)
 @server(yimei-account.openfaas-fn.svc.cluster.local)
 @port(8080)
 

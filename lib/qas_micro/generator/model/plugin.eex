@@ -183,10 +183,10 @@ defmodule <%= model_plugin_module %> do
         |> Repo.insert
         |> case do
           {:ok, item} ->
-            <%= Macro.camelize(object_name) %>Result.new(<%= object_name %>: item)
+            <%= Macro.camelize(application_name) %>.<%= Macro.camelize(object_name) %>Result.new(<%= object_name %>: item)
 
           {:error, changeset} ->
-            <%= Macro.camelize(object_name) %>Result.new(errors: transform_errors(changeset))
+            <%= Macro.camelize(application_name) %>.<%= Macro.camelize(object_name) %>Result.new(errors: transform_errors(changeset))
         end
       end
 
@@ -198,7 +198,7 @@ defmodule <%= model_plugin_module %> do
 
         case record do
           nil ->
-            <%= Macro.camelize(object_name) %>Result.new(errors: %{key: "not_found", message: "can not find record"})
+            <%= Macro.camelize(application_name) %>.<%= Macro.camelize(object_name) %>Result.new(errors: %{key: "not_found", message: "can not find record"})
 
           _ ->
             record
@@ -206,10 +206,10 @@ defmodule <%= model_plugin_module %> do
             |> Repo.update
             |> case do
               {:ok, item} ->
-                <%= Macro.camelize(object_name) %>Result.new(<%= object_name %>: item)
+                <%= Macro.camelize(application_name) %>.<%= Macro.camelize(object_name) %>Result.new(<%= object_name %>: item)
 
               {:error, changeset} ->
-                <%= Macro.camelize(object_name) %>Result.new(errors: transform_errors(changeset))
+                <%= Macro.camelize(application_name) %>.<%= Macro.camelize(object_name) %>Result.new(errors: transform_errors(changeset))
             end
         end
       end
@@ -221,17 +221,17 @@ defmodule <%= model_plugin_module %> do
 
         case record do
           nil ->
-            Common.Result.new(%{status: "failed", message: "can't find record"})
+            Common.ActionResult.new(%{status: "failed", message: "can't find record"})
 
           _ ->
             record
             |> Repo.delete
             |> case do
               {:ok, _} ->
-                Common.Result.new(%{status: "success", message: "record delete success"})
+                Common.ActionResult.new(%{status: "success", message: "record delete success"})
 
               {:error, _} ->
-                Common.Result.new(%{status: "failed", message: "delete failed"})
+                Common.ActionResult.new(%{status: "failed", message: "delete failed"})
             end
         end
       end
@@ -242,7 +242,7 @@ defmodule <%= model_plugin_module %> do
 
         case auth(auth_input) do
           {:ok, result} ->
-            Auth<%= Macro.camelize(object_name) %>.new(
+            <%= Macro.camelize(application_name) %>.Auth<%= Macro.camelize(object_name) %>.new(
               <%= object_name %>: result,
               app: "<%= application_name %>",
               model: "<%= object_name %>",
@@ -250,7 +250,7 @@ defmodule <%= model_plugin_module %> do
             )
 
           {:error, _} ->
-            Auth<%= Macro.camelize(object_name) %>.new(
+            <%= Macro.camelize(application_name) %>.Auth<%= Macro.camelize(object_name) %>.new(
               <%= object_name %>: nil,
               app: "<%= application_name %>",
               model: "<%= object_name %>",
