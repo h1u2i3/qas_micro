@@ -12,7 +12,8 @@ defmodule Mix.Tasks.Micro.Install do
   alias QasMicro.Middleware.Code.{
     CodeClean,
     Database,
-    Model
+    Model,
+    Grpc
   }
 
   def run(args) do
@@ -34,6 +35,6 @@ defmodule Mix.Tasks.Micro.Install do
       }
     }
 
-    Pipeline.chain(pipeline, [CodeClean, FileConfig, Lexer, ConfigModule, Database, Model])
+    Pipeline.chain(pipeline, [CodeClean, FileConfig, Lexer, ConfigModule, Database, Model, Grpc])
   end
 end
