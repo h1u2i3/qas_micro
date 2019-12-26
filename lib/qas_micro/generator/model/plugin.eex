@@ -178,7 +178,7 @@ defmodule <%= model_plugin_module %> do
       def create_<%= object_name %>(create_input, _stream) do
         {input, _} = Map.split(create_input, [:user])
 
-        new
+        new()
         |> create_changeset(input)
         |> Repo.insert
         |> case do
