@@ -15,7 +15,7 @@ message FilterUserInput {
   string typeable_id = 2;
   string typeable_type = 3;
   string status = 4;
-  
+
 }
 
 message UsersParams {
@@ -24,7 +24,7 @@ message UsersParams {
   common.PaginateInput paginate = 3;
   common.UserInfo user = 4;
   repeated int32 ids = 5;
-  
+
 }
 
 message CreateUserInput {
@@ -33,7 +33,7 @@ message CreateUserInput {
   int32 typeable_id = 3;
   string typeable_type = 4;
   string status = 5;
-  
+
   common.UserInfo user = 6;
 }
 
@@ -43,7 +43,7 @@ message UpdateUserInput {
   int32 typeable_id = 3;
   string typeable_type = 4;
   string status = 5;
-  
+
   common.UserInfo user = 6;
   int32 id = 7;
 }
@@ -57,7 +57,7 @@ message User {
   string status = 6;
   int32 created_at = 7;
   int32 updated_at = 8;
-  
+
 }
 
 message Users {
@@ -76,7 +76,7 @@ message FilterOrgInput {
   string address = 3;
   string employee_id = 4;
   string status = 5;
-  
+
 }
 
 message OrgsParams {
@@ -86,7 +86,7 @@ message OrgsParams {
   common.UserInfo user = 4;
   repeated int32 ids = 5;
   repeated int32 employee_ids = 6;
-  
+
 }
 
 message CreateOrgInput {
@@ -95,7 +95,7 @@ message CreateOrgInput {
   string address = 3;
   int32 employee_id = 4;
   string status = 5;
-  
+
   common.UserInfo user = 6;
 }
 
@@ -105,7 +105,7 @@ message UpdateOrgInput {
   string address = 3;
   int32 employee_id = 4;
   string status = 5;
-  
+
   common.UserInfo user = 6;
   int32 id = 7;
 }
@@ -121,7 +121,7 @@ message Org {
   repeated admin.Department departments = 8;
   int32 created_at = 9;
   int32 updated_at = 10;
-  
+
 }
 
 message Orgs {
@@ -138,7 +138,7 @@ message FilterDutyInput {
   string code = 1;
   string name = 2;
   string role_id = 3;
-  
+
 }
 
 message DutiesParams {
@@ -148,14 +148,14 @@ message DutiesParams {
   common.UserInfo user = 4;
   repeated int32 ids = 5;
   repeated int32 role_ids = 6;
-  
+
 }
 
 message CreateDutyInput {
   string code = 1;
   string name = 2;
   int32 role_id = 3;
-  
+
   common.UserInfo user = 4;
 }
 
@@ -163,7 +163,7 @@ message UpdateDutyInput {
   string code = 1;
   string name = 2;
   int32 role_id = 3;
-  
+
   common.UserInfo user = 4;
   int32 id = 5;
 }
@@ -178,7 +178,7 @@ message Duty {
   repeated admin.Access accesses = 7;
   int32 created_at = 8;
   int32 updated_at = 9;
-  
+
 }
 
 message Duties {
@@ -195,7 +195,7 @@ message FilterEntityInput {
   string code = 1;
   string name = 2;
   string alias = 3;
-  
+
 }
 
 message EntitiesParams {
@@ -204,14 +204,14 @@ message EntitiesParams {
   common.PaginateInput paginate = 3;
   common.UserInfo user = 4;
   repeated int32 ids = 5;
-  
+
 }
 
 message CreateEntityInput {
   string code = 1;
   string name = 2;
   string alias = 3;
-  
+
   common.UserInfo user = 4;
 }
 
@@ -219,7 +219,7 @@ message UpdateEntityInput {
   string code = 1;
   string name = 2;
   string alias = 3;
-  
+
   common.UserInfo user = 4;
   int32 id = 5;
 }
@@ -232,7 +232,7 @@ message Entity {
   repeated admin.Operation operations = 5;
   int32 created_at = 6;
   int32 updated_at = 7;
-  
+
 }
 
 message Entities {
@@ -252,7 +252,7 @@ message FilterDepartmentInput {
   string employee_id = 4;
   string org_id = 5;
   string status = 6;
-  
+
 }
 
 message DepartmentsParams {
@@ -262,7 +262,7 @@ message DepartmentsParams {
   common.UserInfo user = 4;
   repeated int32 ids = 5;
   repeated int32 org_ids = 6;
-  
+
 }
 
 message CreateDepartmentInput {
@@ -272,7 +272,7 @@ message CreateDepartmentInput {
   int32 employee_id = 4;
   int32 org_id = 5;
   string status = 6;
-  
+
   common.UserInfo user = 7;
 }
 
@@ -283,7 +283,7 @@ message UpdateDepartmentInput {
   int32 employee_id = 4;
   int32 org_id = 5;
   string status = 6;
-  
+
   common.UserInfo user = 7;
   int32 id = 8;
 }
@@ -299,7 +299,7 @@ message Department {
   admin.Org org = 8;
   int32 created_at = 9;
   int32 updated_at = 10;
-  
+
 }
 
 message Departments {
@@ -316,7 +316,7 @@ message FilterRoleInput {
   string code = 1;
   string org_id = 2;
   string name = 3;
-  
+
 }
 
 message RolesParams {
@@ -326,14 +326,14 @@ message RolesParams {
   common.UserInfo user = 4;
   repeated int32 ids = 5;
   repeated int32 org_ids = 6;
-  
+
 }
 
 message CreateRoleInput {
   string code = 1;
   int32 org_id = 2;
   string name = 3;
-  
+
   common.UserInfo user = 4;
 }
 
@@ -341,7 +341,7 @@ message UpdateRoleInput {
   string code = 1;
   int32 org_id = 2;
   string name = 3;
-  
+
   common.UserInfo user = 4;
   int32 id = 5;
 }
@@ -356,7 +356,7 @@ message Role {
   repeated admin.Duty duties = 7;
   int32 created_at = 8;
   int32 updated_at = 9;
-  
+
 }
 
 message Roles {
@@ -381,7 +381,7 @@ message FilterEmployeeInput {
   string alias = 9;
   string birth = 10;
   string email = 11;
-  
+
 }
 
 message EmployeesParams {
@@ -392,7 +392,7 @@ message EmployeesParams {
   repeated int32 ids = 5;
   repeated int32 duty_ids = 6;
   repeated int32 department_ids = 7;
-  
+
 }
 
 message CreateEmployeeInput {
@@ -408,7 +408,7 @@ message CreateEmployeeInput {
   string alias = 10;
   int32 birth = 11;
   string email = 12;
-  
+
   common.UserInfo user = 13;
 }
 
@@ -425,7 +425,7 @@ message UpdateEmployeeInput {
   string alias = 10;
   int32 birth = 11;
   string email = 12;
-  
+
   common.UserInfo user = 13;
   int32 id = 14;
 }
@@ -448,7 +448,7 @@ message Employee {
   admin.Department department = 15;
   int32 created_at = 16;
   int32 updated_at = 17;
-  
+
 }
 
 message Employees {
@@ -465,7 +465,7 @@ message FilterOperationInput {
   string role_id = 1;
   string entity_id = 2;
   string auths = 3;
-  
+
 }
 
 message OperationsParams {
@@ -476,14 +476,14 @@ message OperationsParams {
   repeated int32 ids = 5;
   repeated int32 role_ids = 6;
   repeated int32 entity_ids = 7;
-  
+
 }
 
 message CreateOperationInput {
   int32 role_id = 1;
   int32 entity_id = 2;
   string auths = 3;
-  
+
   common.UserInfo user = 4;
 }
 
@@ -491,7 +491,7 @@ message UpdateOperationInput {
   int32 role_id = 1;
   int32 entity_id = 2;
   string auths = 3;
-  
+
   common.UserInfo user = 4;
   int32 id = 5;
 }
@@ -505,7 +505,7 @@ message Operation {
   admin.Entity entity = 6;
   int32 created_at = 7;
   int32 updated_at = 8;
-  
+
 }
 
 message Operations {
@@ -521,7 +521,7 @@ message OperationResult {
 message FilterAccessInput {
   string duty_id = 1;
   string org_list = 2;
-  
+
 }
 
 message AccessesParams {
@@ -531,20 +531,20 @@ message AccessesParams {
   common.UserInfo user = 4;
   repeated int32 ids = 5;
   repeated int32 duty_ids = 6;
-  
+
 }
 
 message CreateAccessInput {
   int32 duty_id = 1;
   string org_list = 2;
-  
+
   common.UserInfo user = 3;
 }
 
 message UpdateAccessInput {
   int32 duty_id = 1;
   string org_list = 2;
-  
+
   common.UserInfo user = 3;
   int32 id = 4;
 }
@@ -556,7 +556,7 @@ message Access {
   admin.Duty duty = 4;
   int32 created_at = 5;
   int32 updated_at = 6;
-  
+
 }
 
 message Accesses {
@@ -576,13 +576,13 @@ message AuthUser {
   string app = 2;
   string model = 3;
   int32 id = 4;
-  
+
 }
 
 message AuthUserInput {
   string name = 1;
   string password = 2;
-  
+
   common.UserInfo user = 3;
 }
 
@@ -606,7 +606,7 @@ message AuthUserInput {
 
 
 service Admin {
-  
+
   rpc ListUser(common.ID) returns (User) {}
 rpc ListUsers(UsersParams) returns (Users) {}
 rpc CreateUser(CreateUserInput) returns (UserResult) {}
@@ -661,15 +661,15 @@ rpc CreateAccess(CreateAccessInput) returns (AccessResult) {}
 rpc UpdateAccess(UpdateAccessInput) returns (AccessResult) {}
 rpc DeleteAccess(common.ID) returns (common.ActionResult) {}
 
-  
+
   rpc CreateAuthUser (AuthUserInput) returns (AuthUser) {}
 
-  
-  
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
+
+
 }

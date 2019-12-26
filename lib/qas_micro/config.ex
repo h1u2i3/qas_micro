@@ -104,6 +104,7 @@ defmodule QasMicro.Config do
 
               if replace_origin do
                 File.write!(path, Code.format_string!(string))
+                # File.write!(path, string)
               else
                 if !File.exists?(path) do
                   File.write!(path, Code.format_string!(string))

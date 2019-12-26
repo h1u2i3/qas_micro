@@ -1,10 +1,10 @@
-defmodule QasMicro.Database.Middleware.Migrate do
+defmodule QasMicro.Middleware.Database.Migrate do
   alias QasMicro.Pipeline
   alias QasMicro.Database.{GenMigration, Migrator}
 
   def call(
         %Pipeline{
-          assigns: %{app: app, config_module: config_module, migration_app: migration_app}
+          assigns: %{app: app, config_module: config_module}
         } = pipeline
       ) do
     repo = config_module.repo_module()
@@ -13,27 +13,17 @@ defmodule QasMicro.Database.Middleware.Migrate do
     try do
       Code.compiler_options(ignore_module_conflict: true)
 
-      migration_folder =
-        if migration_app do
-          migration_app
-          |> :code.priv_dir()
-          |> List.to_string()
-          |> Path.join("migrations")
-        else
-          "priv/migrations"
-        end
-        |> Path.join(app_name)
-
-      schema_modules = QasMicro.Cache.schema_modules(app)
+      migration_folder = "priv/migrations"
+      schemas = Yacto.Migration.Util.get_all_schema(:qas_micro) || []
 
       # TODO: better error handle
       # try do
       repo.start_link()
-      GenMigration.run(schema_modules, migration_folder)
-      Migrator.migrate(repo, schema_modules, migration_folder)
+      GenMigration.run(schemas, migration_folder)
+      Migrator.migrate(repo, schemas, migration_folder)
       :ok
     after
-      repo.stop()
+      # repo.stop()
       Code.compiler_options(ignore_module_conflict: false)
     end
 

@@ -1,4 +1,4 @@
-defmodule QasMicro.Database.Middleware.Seed do
+defmodule QasMicro.Middleware.Database.Seed do
   alias QasMicro.Pipeline
 
   import QasMicro.Util.Helper

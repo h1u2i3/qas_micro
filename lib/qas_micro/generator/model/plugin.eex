@@ -4,6 +4,7 @@ defmodule <%= model_plugin_module %> do
       use Ecto.Schema
 
       import Ecto.Query
+      import QasMicro.Query
       import Geo.PostGIS
       import QasMicro.Util.Sigil
       import QasMicro.Util.Helper
@@ -99,12 +100,11 @@ defmodule <%= model_plugin_module %> do
 
     <%= if auth do %>
       def auth(input) do
-        with {:ok, user} <- sign_in(input),
-             {:ok, token, _claims} <- <%= guardian_module_name %>.encode_and_sign(user, %{}, token_type: "token") do
-          {:ok, %{token: token, <%= object_name %>: user}}
+        with {:ok, user} <- sign_in(input) do
+          {:ok, user}
         else
           {:error, reason} ->
-            {:ok, %{error: %{key: :unauthorized, message: reason}}}
+            {:error, reason}
         end
       end
 
@@ -131,28 +131,6 @@ defmodule <%= model_plugin_module %> do
           {:error, "user does not exist or wrong password"}
         end
       end
-
-      defp find_or_create_with_cellphone(info) do
-        user = Repo.get_by(<%= model_module %>, QasMicro.Util.Helper.map_to_keyword(info))
-
-        case user do
-          nil ->
-            new()
-            |> Ecto.Changeset.change(info)
-            |> Repo.insert
-            |> case do
-              {:ok, user} ->
-                <%= config_module %>.callback_module().on_event("<%= object_name %>_created", user)
-                {:ok, user}
-
-              {:error, changeset} ->
-                {:error, changeset}
-            end
-
-          _ ->
-            {:ok, user}
-        end
-      end
     <% end %>
 
       # return empty struct
@@ -160,6 +138,7 @@ defmodule <%= model_plugin_module %> do
         %__MODULE__{}
       end
 
+      # fields config with different
       def all_fields do
         <%= all_fields %>
       end
@@ -171,6 +150,143 @@ defmodule <%= model_plugin_module %> do
       def update_fields do
         <%= update_fields %>
       end
+
+      # the methods used in grpc services
+      def list_<%= object_name %>(common_id, _stream) do
+        %{id: id} = common_id
+
+        __MODULE__
+        |> Repo.get(id)
+        |> <%= Macro.camelize(application_name) %>.<%= Macro.camelize(object_name) %>.new()
+      end
+
+      def list_<%= Inflex.pluralize(object_name) %>(params, _stream) do
+        {ids_map, _} = Map.split(params, [:filter, :order, :paginate, :user])
+
+        result =
+          params
+          |> Map.take([:filter, :order, :paginate])
+          |> Enum.reduce(__MODULE__, plural_query_reducer(__MODULE__))
+          |> ids_filter(ids_map)
+          |> Repo.all
+
+        <%= Macro.camelize(application_name) %>.<%= object_name |> Inflex.pluralize() |> Macro.camelize() %>.new(
+          <%= Inflex.pluralize(object_name) %>: result
+        )
+      end
+
+      def create_<%= object_name %>(create_input, _stream) do
+        {input, _} = Map.split(create_input, [:user])
+
+        new
+        |> create_changeset(input)
+        |> Repo.insert
+        |> case do
+          {:ok, item} ->
+            <%= Macro.camelize(object_name) %>Result.new(<%= object_name %>: item)
+
+          {:error, changeset} ->
+            <%= Macro.camelize(object_name) %>Result.new(errors: transform_errors(changeset))
+        end
+      end
+
+      def update_<%= object_name %>(update_input, _stream) do
+        %{id: id} = update_input
+        {input, _} = Map.split(update_input, [:user, :id])
+
+        record = Repo.get(<%= model_module %>, id)
+
+        case record do
+          nil ->
+            <%= Macro.camelize(object_name) %>Result.new(errors: %{key: "not_found", message: "can not find record"})
+
+          _ ->
+            record
+            |> update_changeset(input)
+            |> Repo.update
+            |> case do
+              {:ok, item} ->
+                <%= Macro.camelize(object_name) %>Result.new(<%= object_name %>: item)
+
+              {:error, changeset} ->
+                <%= Macro.camelize(object_name) %>Result.new(errors: transform_errors(changeset))
+            end
+        end
+      end
+
+      def delete_<%= object_name %>(common_id, _stream) do
+        %{id: id} = common_id
+
+        record = Repo.get(<%= model_module %>, id)
+
+        case record do
+          nil ->
+            Common.Result.new(%{status: "failed", message: "can't find record"})
+
+          _ ->
+            record
+            |> Repo.delete
+            |> case do
+              {:ok, _} ->
+                Common.Result.new(%{status: "success", message: "record delete success"})
+
+              {:error, _} ->
+                Common.Result.new(%{status: "failed", message: "delete failed"})
+            end
+        end
+      end
+
+    <%= if auth do %>
+      def create_auth_<%= object_name %>(input, _stream) do
+        auth_input = Map.take(input, [:name, :password])
+
+        case auth(auth_input) do
+          {:ok, result} ->
+            Auth<%= Macro.camelize(object_name) %>.new(
+              <%= object_name %>: result,
+              app: "<%= application_name %>",
+              model: "<%= object_name %>",
+              id: result.id
+            )
+
+          {:error, _} ->
+            Auth<%= Macro.camelize(object_name) %>.new(
+              <%= object_name %>: nil,
+              app: "<%= application_name %>",
+              model: "<%= object_name %>",
+              id: nil
+            )
+        end
+      end
+    <% end %>
+
+      defp transform_errors(changeset) do
+        changeset
+        |> Ecto.Changeset.traverse_errors(&format_error/1)
+        |> Enum.map(fn {key, value} ->
+          %{key: key, message: value}
+        end)
+      end
+
+      defp format_error({msg, opts}) do
+        Enum.reduce(opts, msg, fn {key, value}, acc ->
+          String.replace(acc, "%{#{key}}", to_string(value))
+        end)
+      end
+
+      def paginate_with(query, pagination) do
+        if is_nil(pagination) || Enum.empty?(pagination) do
+          query
+        else
+          offset = Map.get(pagination, :offset, 0)
+          limit = Map.get(pagination, :limit, 10)
+          from(q in query, limit: ^limit, offset: ^offset)
+        end
+      end
+
+      def order_with(query, _item), do: query
+
+      def filter_with(query, _item), do: query
 
       defoverridable Module.definitions_in(__MODULE__, :def)
     end
