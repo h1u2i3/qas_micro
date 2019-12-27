@@ -165,7 +165,7 @@ defmodule <%= model_plugin_module %> do
       end
 
       def list_<%= Inflex.pluralize(object_name) %>(params, _stream) do
-        {ids_map, _} = Map.split(params, [:filter, :order, :paginate, :user])
+        {_, ids_map} = Map.split(params, [:filter, :order, :paginate, :user])
 
         result =
           params
