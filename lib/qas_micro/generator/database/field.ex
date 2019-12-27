@@ -7,10 +7,11 @@ defmodule QasMicro.Generator.Database.Field do
   # will be effect in some other part of render
   # but should be removed in fied render
   @plugin_settings [:update, :create, :role, :filter, :index, :unique]
+  @relation_keys [:belongs_to, :has_many, :has_one]
 
   def render(object) do
     object
-    |> QMap.get(:field, [])
+    |> filter_fields()
     |> add_plugin_fields(object)
     |> Enum.map(&render_single/1)
     |> Enum.filter(& &1)
@@ -21,6 +22,12 @@ defmodule QasMicro.Generator.Database.Field do
     |> remove_pulgin_setting
     |> arange_attributes
     |> render_to_string
+  end
+
+  defp filter_fields(object) do
+    object
+    |> QMap.get(:field, [])
+    |> Enum.filter(&(!Enum.member?(@relation_keys, String.to_atom(&1.type))))
   end
 
   defp add_plugin_fields(fields, object) do

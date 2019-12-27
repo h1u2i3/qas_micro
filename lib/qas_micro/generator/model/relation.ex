@@ -9,8 +9,9 @@ defmodule QasMicro.Generator.Model.Relation do
 
   def render(config_module, object) do
     object
-    |> Map.get(:schema, [])
+    |> Map.get(:field, [])
     |> Enum.filter(&Enum.member?(@relation_keys, &1.type |> String.to_atom()))
+    |> Enum.filter(&(!Map.get(&1, :struct)))
     |> Enum.map(&render_single(config_module, &1))
   end
 

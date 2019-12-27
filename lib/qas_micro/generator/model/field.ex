@@ -10,7 +10,12 @@ defmodule QasMicro.Generator.Model.Field do
   @relation_keys [:has_many, :many_to_many, :has_one, :belongs_to, :embeds_one, :embeds_many]
 
   def render(object) do
-    schema = Map.get(object, :schema, [])
+    schema =
+      object
+      |> Map.get(:field, [])
+      |> Enum.filter(&Enum.member?(@relation_keys, String.to_atom(&1.type)))
+      |> Enum.filter(&(!Map.get(&1, :struct)))
+
     schema_names = get_value_from_map_list(schema, :name)
     schema_foreign_keys = get_value_from_map_list(schema, :foreign_key)
     schema_targets = get_value_from_map_list(schema, :target)
@@ -21,11 +26,6 @@ defmodule QasMicro.Generator.Model.Field do
     |> Enum.filter(
       &filter_with_relation_field(&1, schema_names, schema_targets, schema_foreign_keys)
     )
-    |> Kernel.++(Map.get(object, :schema, []))
-    # |> Kernel.++([
-    #   %{name: "row_number", type: "integer", virtual: true},
-    #   %{name: "through_key", type: "string", virtual: true}
-    # ])
     |> Enum.map(&render_single/1)
     |> Enum.filter(& &1)
   end
