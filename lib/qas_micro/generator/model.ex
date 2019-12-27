@@ -8,6 +8,7 @@ defmodule QasMicro.Generator.Model do
   alias QasMicro.Util.Map, as: QMap
 
   @external_resource Path.join(__DIR__, "model/plugin.eex")
+  @relation_keys [:has_many, :many_to_many, :has_one, :belongs_to, :embeds_one, :embeds_many]
 
   def render(config_module, object) do
     object_name = object.name
@@ -142,12 +143,17 @@ defmodule QasMicro.Generator.Model do
   def all_fields(object) do
     object
     |> Map.get(:plugin, [])
-    |> Enum.reduce(QMap.get(object, :field, []), fn
-      {:wechat, true}, acc -> [%{name: "wechat_digest", type: "string"} | acc]
-      {:password, true}, acc -> [%{name: "password_digest", type: "string"} | acc]
-      {:unique_number, true}, acc -> [%{name: "unique_number", type: "string"} | acc]
-      _, acc -> acc
-    end)
+    |> Enum.reduce(
+      object
+      |> QMap.get(:field, [])
+      |> Enum.filter(&Enum.member?(@relation_keys, &1.type |> String.to_atom())),
+      fn
+        {:wechat, true}, acc -> [%{name: "wechat_digest", type: "string"} | acc]
+        {:password, true}, acc -> [%{name: "password_digest", type: "string"} | acc]
+        {:unique_number, true}, acc -> [%{name: "unique_number", type: "string"} | acc]
+        _, acc -> acc
+      end
+    )
     |> Kernel.++(Enum.filter(QMap.get(object, :schema, []), &Map.get(&1, :virtual)))
     |> Enum.map(&String.to_atom(&1.name))
   end
@@ -157,7 +163,11 @@ defmodule QasMicro.Generator.Model do
       object
       |> Map.get(:schema, [])
       |> Enum.filter(&Map.get(&1, :virtual, false))
-      |> Kernel.++(Map.get(object, :field, []))
+      |> Kernel.++(
+        object
+        |> QMap.get(:field, [])
+        |> Enum.filter(&Enum.member?(@relation_keys, &1.type |> String.to_atom()))
+      )
       |> Enum.filter(&Map.get(&1, :create, true))
       |> Enum.map(&Map.get(&1, :name))
 
@@ -175,7 +185,11 @@ defmodule QasMicro.Generator.Model do
       object
       |> Map.get(:schema, [])
       |> Enum.filter(&Map.get(&1, :virtual, false))
-      |> Kernel.++(Map.get(object, :field, []))
+      |> Kernel.++(
+        object
+        |> QMap.get(:field, [])
+        |> Enum.filter(&Enum.member?(@relation_keys, &1.type |> String.to_atom()))
+      )
       |> Enum.filter(&Map.get(&1, :update, true))
       |> Enum.map(&Map.get(&1, :name))
 

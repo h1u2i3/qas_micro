@@ -30,7 +30,7 @@ defmodule <%= model_plugin_module %> do
       @update_fields <%= update_fields %><%= if password do %>
       @password_fields [:password, :password_confirmation]<% end %>
 
-      def create_changeset(struct, params \\ %{}, _role \\ :visitor) do
+      def create_changeset(struct, params \\ %{}) do
         struct
         |> Ecto.Changeset.cast(params, @create_fields)<%= for validation <- create_validation do %>
         <%= validation %><% end %><%= if password do %>
@@ -44,7 +44,7 @@ defmodule <%= model_plugin_module %> do
       <%= status_changeset_method %>
     <% end %>
 
-      def update_changeset(struct, params \\ %{}, _role \\ :visitor) do
+      def update_changeset(struct, params \\ %{}) do
         struct
         |> Ecto.Changeset.change()
         |> Ecto.Changeset.cast(params, @update_fields)<%= for validation <- update_validation do %>
