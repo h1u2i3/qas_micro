@@ -155,9 +155,13 @@ defmodule <%= model_plugin_module %> do
       def list_<%= object_name %>(common_id, _stream) do
         %{id: id} = common_id
 
-        __MODULE__
-        |> Repo.get(id)
-        |> <%= Macro.camelize(application_name) %>.<%= Macro.camelize(object_name) %>.new()
+        case Repo.get(__MODULE__, id) do
+          nil ->
+            raise("can not find record with id #{id}")
+
+          result ->
+            <%= Macro.camelize(application_name) %>.<%= Macro.camelize(object_name) %>.new(result)
+        end
       end
 
       def list_<%= Inflex.pluralize(object_name) %>(params, _stream) do
@@ -275,7 +279,7 @@ defmodule <%= model_plugin_module %> do
       end
 
       def paginate_with(query, pagination) do
-        if is_nil(pagination) || Enum.empty?(pagination) do
+        if is_nil(pagination) do
           query
         else
           offset = Map.get(pagination, :offset, 0)
