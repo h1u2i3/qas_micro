@@ -146,7 +146,7 @@ defmodule QasMicro.Generator.Model do
     |> Enum.reduce(
       object
       |> QMap.get(:field, [])
-      |> Enum.filter(&Enum.member?(@relation_keys, &1.type |> String.to_atom())),
+      |> Enum.filter(&(!Enum.member?(@relation_keys, &1.type |> String.to_atom()))),
       fn
         {:wechat, true}, acc -> [%{name: "wechat_digest", type: "string"} | acc]
         {:password, true}, acc -> [%{name: "password_digest", type: "string"} | acc]
@@ -166,7 +166,7 @@ defmodule QasMicro.Generator.Model do
       |> Kernel.++(
         object
         |> QMap.get(:field, [])
-        |> Enum.filter(&Enum.member?(@relation_keys, &1.type |> String.to_atom()))
+        |> Enum.filter(&(!Enum.member?(@relation_keys, &1.type |> String.to_atom())))
       )
       |> Enum.filter(&Map.get(&1, :create, true))
       |> Enum.map(&Map.get(&1, :name))
@@ -188,7 +188,7 @@ defmodule QasMicro.Generator.Model do
       |> Kernel.++(
         object
         |> QMap.get(:field, [])
-        |> Enum.filter(&Enum.member?(@relation_keys, &1.type |> String.to_atom()))
+        |> Enum.filter(&(!Enum.member?(@relation_keys, &1.type |> String.to_atom())))
       )
       |> Enum.filter(&Map.get(&1, :update, true))
       |> Enum.map(&Map.get(&1, :name))
