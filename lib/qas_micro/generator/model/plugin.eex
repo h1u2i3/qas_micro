@@ -155,7 +155,7 @@ defmodule <%= model_plugin_module %> do
       def list_<%= object_name %>(common_id, _stream) do
         %{id: id} = common_id
 
-        Repo.get(__MODULE__, id) do
+        case Repo.get(__MODULE__, id) do
           nil ->
             nil
 
