@@ -90,7 +90,9 @@ defmodule QasMicro.Query do
   end
 
   def ids_filter(query, ids_map) do
-    Enum.reduce(ids_map, query, fn {key, value}, query ->
+    {_, cast_ids_map} = Map.split(ids_map, [:__struct__])
+
+    Enum.reduce(cast_ids_map, query, fn {key, value}, query ->
       if value == nil || Enum.empty?(value) do
         query
       else
