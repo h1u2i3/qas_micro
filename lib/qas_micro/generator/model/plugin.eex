@@ -155,9 +155,9 @@ defmodule <%= model_plugin_module %> do
       def list_<%= object_name %>(common_id, _stream) do
         %{id: id} = common_id
 
-        case Repo.get(__MODULE__, id) do
+        Repo.get(__MODULE__, id) do
           nil ->
-            raise("can not find record with id #{id}")
+            nil
 
           result ->
             <%= Macro.camelize(application_name) %>.<%= Macro.camelize(object_name) %>.new(result)
