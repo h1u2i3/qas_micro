@@ -29,7 +29,9 @@ defmodule QasMicro.Query do
   end
 
   def filter_with(query, filter, module) do
-    Enum.reduce(filter, query, fn {key, item}, query ->
+    filter
+    |> Map.drop([:__struct__])
+    |> Enum.reduce(query, fn {key, item}, query ->
       handle_with_filter(module, query, key, item)
     end)
   end
@@ -40,17 +42,17 @@ defmodule QasMicro.Query do
 
   def order_with(query, order, module) do
     Enum.reduce(order, query, fn order_item, query ->
-      order = Map.get(order_item, :order, :asc)
+      order = Map.get(order_item, :order, :ASC)
       name = String.to_atom(Map.get(order_item, :name, "id"))
 
       case order do
-        :asc ->
+        :ASC ->
           from(q in query, order_by: [asc: field(q, ^name)])
 
-        :desc ->
+        :DESC ->
           from(q in query, order_by: [desc: field(q, ^name)])
 
-        :special ->
+        :SPECIAL ->
           module.order_with(query, name)
       end
     end)

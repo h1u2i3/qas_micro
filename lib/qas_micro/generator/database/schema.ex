@@ -57,6 +57,9 @@ defmodule QasMicro.Generator.Database.Schema do
     defmodule <%= schema_module %> do
       use Yacto.Schema, dbname: <%= schema_database %>
 
+      @primary_key {:id, :string, autogenerate: {UUID, :uuid4, []}}
+      @primary_key_meta %{id: [size: 64]}
+
     <%= unless primary_key do %>
       @primary_key false
     <% end %>
@@ -64,7 +67,7 @@ defmodule QasMicro.Generator.Database.Schema do
       schema "<%= schema_table %>" do<%= for field <- field_expressions do %>
         <%= field %><% end %><%= for index <- index_expressions do %>
         <%= index %><% end %><%= if timestamp do %>
-        timestamps(inserted_at: :created_at, type: :integer)
+        timestamps(inserted_at: :created_at, type: :integer, autogenerate: {:os, :system_time, [:seconds]})
         <% end %>
       end
     end
