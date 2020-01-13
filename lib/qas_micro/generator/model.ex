@@ -172,7 +172,7 @@ defmodule QasMicro.Generator.Model do
       |> Enum.map(&Map.get(&1, :name))
 
     if plugin_enabled?(object, :password) do
-      origin_fields -- ["password_digest"]
+      (origin_fields -- ["password_digest"]) ++ ["password"]
     else
       origin_fields
     end
