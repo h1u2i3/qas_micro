@@ -249,7 +249,7 @@ defmodule <%= model_plugin_module %> do
 
     <%= if auth do %>
       def create_auth_<%= object_name %>(input, _stream) do
-        auth_input = Map.take(input, [:name, :password])
+        auth_input = Map.drop(input, [:__struct__])
 
         case auth(auth_input) do
           {:ok, result} ->
