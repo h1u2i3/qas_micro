@@ -254,7 +254,7 @@ defmodule <%= model_plugin_module %> do
         case auth(auth_input) do
           {:ok, result} ->
             <%= Macro.camelize(application_name) %>.Auth<%= Macro.camelize(object_name) %>.new(
-              <%= object_name %>: result,
+              <%= object_name %>: Map.drop(result, [:__struct__]),
               app: "<%= application_name %>",
               model: "<%= object_name %>",
               id: result.id
