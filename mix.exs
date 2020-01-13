@@ -29,6 +29,7 @@ defmodule QasMicro.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:geo_postgis, "~> 3.1"},
       {:grpc, github: "elixir-grpc/grpc"},
+      {:comeonin, "~> 5.1"},
 
       # deps fix
       {:cowboy, "~> 2.7.0"},
