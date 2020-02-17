@@ -157,9 +157,11 @@ defmodule <%= model_plugin_module %> do
       def list_<%= object_name %>(common_id, _stream) do
         %{id: id} = common_id
 
-        <%= Macro.camelize(application_name) %>.<%= Macro.camelize(object_name) %>.new(
-          Repo.get(__MODULE__, id) || %{}
-        )
+        __MODULE__
+        |> Repo.get(id)
+        |> Kernel.||(%{})
+        |> Map.drop([:__struct__])
+        |> <%= Macro.camelize(application_name) %>.<%= Macro.camelize(object_name) %>.new()
       end
 
       def list_<%= Inflex.pluralize(object_name) %>(params, _stream) do
