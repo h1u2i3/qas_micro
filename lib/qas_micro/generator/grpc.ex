@@ -57,6 +57,7 @@ defmodule QasMicro.Generator.Grpc do
 
       intercept GRPC.Logger.Server
       run <%= camel_app_name %>.<%= camel_app_name %>.Server
+      run Health.Server
     end
     """
   end
