@@ -1,8 +1,6 @@
 Nonterminals
   grammer
-  object_blocks object_block object_items object_item service_items service_item
-  global_block field_block
-  text_content service_blocks service_block
+  object_blocks object_block object_items object_item global_block field_block text_content
   query_blocks query_block mutation_blocks mutation_block type_blocks type_block input_type_blocks input_type_block
   type_attrs plus_attrs plus_attr attrs attr content code_content.
   % schema_block validation_block permission_block seed_blocks seed_block
@@ -20,8 +18,8 @@ Terminals
 Rootsymbol grammer.
 
 grammer -> attrs                  : '$1'.
-grammer -> grammer service_blocks : [{'service', '$2'}|'$1'].
 grammer -> grammer global_block   : [{'global', '$2'}|'$1'].
+grammer -> grammer object_blocks  : [{'object', '$2'}|'$1'].
 
 % grammer -> grammer wechat_block                           : [{'wechat', '$2'}|'$1'].
 % grammer -> grammer worker_block                           : [{'worker', '$2'}|'$1'].
@@ -29,16 +27,6 @@ grammer -> grammer global_block   : [{'global', '$2'}|'$1'].
 % grammer -> grammer callback_block                         : [{'callback', '$2'}|'$1'].
 % grammer -> grammer object_blocks                          : [{'object', '$2'}|'$1'].
 % wechat_block  -> section_wechat do_exp attrs end_exp      : '$3'.
-
-service_blocks -> service_block                                 : ['$1'].
-service_blocks -> service_block service_blocks                  : concat_results('$1', '$2').
-service_block  -> section_service do_exp service_items end_exp  : '$3'.
-
-service_items  -> service_item                : '$1'.
-service_items  -> service_item service_items  : concat_results('$1', '$2').
-service_item   -> object_blocks               : {'object', '$1'}.
-service_item   -> attr                        : '$1'.
-
 
 object_blocks -> object_block                               : ['$1'].
 object_blocks -> object_block object_blocks                 : concat_results('$1', '$2').
