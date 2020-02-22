@@ -29,8 +29,8 @@ ADD_ATTR_DEFINATION  = \+{KEY}+
 ATTR_DEFINATION      = {POS_ATTR_DEFINATION}|{NEG_ATTR_DEFINATION}
 TEXT_DEFINITION      = {TEXT_SIGN}({TEXT_CHAR}+)+{TEXT_SIGN}
 CODE_DEFINITION      = {CODE_SIGN}([^`])*{CODE_SIGN}
-SECTION_WORKER       = worker
-SECTION_SETTING      = setting
+SECTION_WORKER       = worker_process
+% SECTION_SETTING      = setting
 SECTION_OBJECT       = object
 SECTION_FIELD        = field
 SECTION_SCHEMA       = schema
@@ -68,7 +68,7 @@ Rules.
 {SECTION_CALLBACK}      : {token, {'section_callback', TokenLine}}.
 {SECTION_EXTENSION}     : {token, {'section_extension', TokenLine}}.
 {SECTION_WORKER}        : {token, {'section_worker', TokenLine}}.
-{SECTION_SETTING}       : {token, {'section_setting', TokenLine}}.
+% {SECTION_SETTING}       : {token, {'section_setting', TokenLine}}.
 {SECTION_GLOBAL}        : {token, {'section_global', TokenLine}}.
 {SECTION_SERVICE}       : {token, {'section_service', TokenLine}}.
 {SECTION_TYPE}          : {token, {'section_type', TokenLine}}.
