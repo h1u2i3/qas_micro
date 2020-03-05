@@ -1,5 +1,274 @@
-defmodule <%= model_module %> do
-  use <%= model_plugin_module %>
+defmodule <%= model_plugin_module %> do
+  defmacro __using__(_opts) do
+    quote do
+      use Ecto.Schema
 
-  # Write your own hooks for specific handler
+      import Ecto.Query
+      import QasMicro.Query
+      import Geo.PostGIS
+      import QasMicro.Util.Sigil
+      import QasMicro.Util.Helper
+
+      alias <%= repo_module_name %>
+
+      <%= if join_table do %>
+      @primary_key false
+      <% else %>
+      @primary_key {:id, :string, autogenerate: {UUID, :uuid4, []}}
+      <% end %>
+
+      schema "<%= table_name %>" do<%= for field <- field_schema do %>
+        <%= field %><% end %><%= for relation <- relation_schema do %>
+        <%= relation %><% end %>
+        <%= if(timestamp, do: "timestamps(inserted_at: :created_at, type: :integer, autogenerate: {:os, :system_time, [:seconds]})") %>
+      end
+
+      <%= if password do %>
+      @password_fields [:password, :password_confirmation]<% end %>
+
+      def create_changeset(struct, params \\ %{}) do
+        struct
+        |> Ecto.Changeset.cast(params, create_fields())<%= for validation <- create_validation do %>
+        <%= validation %><% end %><%= if password do %>
+        |> generate_password_digest()<% end %><%= if unique_number do %>
+        |> generate_unique_number()<% end %><%= if geometry do %>
+        |> cast_geometry()
+        <% end %>
+      end
+
+      def update_changeset(struct, params \\ %{}) do
+        struct
+        |> Ecto.Changeset.change()
+        |> Ecto.Changeset.cast(params, update_fields())<%= for validation <- update_validation do %>
+        <%= validation %><% end %><%= if geometry do %>
+        |> cast_geometry()
+        <% end %>
+      end
+
+    <%= if geometry do %>
+      def cast_geometry(changeset) do
+        if Enum.empty?(changeset.errors) do
+          lon = Ecto.Changeset.get_change(changeset, :lon)
+          lat = Ecto.Changeset.get_change(changeset, :lat)
+
+          if lon && lat do
+            Ecto.Changeset.put_change(changeset, :geom, %Geo.Point{coordinates: {lon, lat}, srid: 4326})
+          else
+            changeset
+          end
+        else
+          changeset
+        end
+      end
+    <% end %>
+
+    <%= if password do %>
+      def password_changeset(struct, params \\ %{}) do
+        struct
+        |> Ecto.Changeset.change()
+        |> Ecto.Changeset.cast(params, @password_fields)
+        |> Ecto.Changeset.validate_confirmation(:password, [])
+        |> check_old_password(Map.get(params, :old_password))
+        |> generate_password_digest
+      end
+
+      defp check_old_password(changeset, old_password) do
+        if Bcrypt.verify_pass(old_password, changeset.data.password_digest) do
+          changeset
+        else
+          Ecto.Changeset.add_error(changeset, :password, "wrong old password")
+        end
+      end
+
+      def generate_password_digest(changeset) do
+        if Enum.empty?(changeset.errors) do
+          plain_passwd = Ecto.Changeset.get_change(changeset, :password)
+          Ecto.Changeset.put_change(changeset, :password_digest, Bcrypt.hash_pwd_salt(plain_passwd))
+        else
+          changeset
+        end
+      end
+    <% end %>
+
+      # return empty struct
+      def new, do: %__MODULE__{}
+
+      # all fields can be overrideable
+      def all_fields,  do: <%= all_fields %>
+
+      # create fields can be overrideable
+      def create_fields, do: <%= create_fields %>
+
+      # update fields can be overrideable
+      def update_fields, do: <%= update_fields %>
+
+      # the methods used in grpc services
+      def list_<%= object_name %>(common_id, _stream) do
+        %{id: id} = common_id
+
+        __MODULE__
+        |> Repo.get(id)
+        |> Kernel.||(%{})
+        |> Map.drop([:__struct__])
+        |> <%= Macro.camelize(application_name) %>.<%= Macro.camelize(object_name) %>.new()
+      end
+
+      def list_<%= Inflex.pluralize(object_name) %>(params, _stream) do
+        {_, ids_map} = Map.split(params, [:filter, :order, :paginate, :user])
+
+        result =
+          params
+          |> Map.take([:filter, :order, :paginate])
+          |> Enum.reduce(__MODULE__, plural_query_reducer(__MODULE__))
+          |> model_ids_filter(ids_map)
+          |> Repo.all
+          |> Enum.map(&Map.drop(&1, [:__struct__]))
+
+        <%= Macro.camelize(application_name) %>.<%= object_name |> Inflex.pluralize() |> Macro.camelize() %>.new(
+          <%= Inflex.pluralize(object_name) %>: result
+        )
+      end
+
+      def create_<%= object_name %>(create_input, _stream) do
+        {_, input} = Map.split(create_input, [:user])
+
+        new()
+        |> create_changeset(input |> Map.drop([:__struct__]))
+        |> Repo.insert
+        |> case do
+          {:ok, item} ->
+            <%= Macro.camelize(application_name) %>.<%= Macro.camelize(object_name) %>Result.new(
+              <%= object_name %>: Map.drop(item, [:__struct__])
+            )
+
+          {:error, changeset} ->
+            <%= Macro.camelize(application_name) %>.<%= Macro.camelize(object_name) %>Result.new(
+              errors: transform_errors(changeset)
+            )
+        end
+      end
+
+      def update_<%= object_name %>(update_input, _stream) do
+        %{id: id} = update_input
+        {_, input} = Map.split(update_input, [:user, :id])
+
+        record = Repo.get(<%= model_module %>, id)
+
+        case record do
+          nil ->
+            <%= Macro.camelize(application_name) %>.<%= Macro.camelize(object_name) %>Result.new(errors: %{key: "not_found", message: "can not find record"})
+
+          _ ->
+            record
+            |> update_changeset(input |> Map.drop([:__struct__]))
+            |> Repo.update
+            |> case do
+              {:ok, item} ->
+                <%= Macro.camelize(application_name) %>.<%= Macro.camelize(object_name) %>Result.new(
+                  <%= object_name %>: Map.drop(item, [:__struct__])
+                )
+
+              {:error, changeset} ->
+                <%= Macro.camelize(application_name) %>.<%= Macro.camelize(object_name) %>Result.new(
+                  errors: transform_errors(changeset)
+                )
+            end
+        end
+      end
+
+      def delete_<%= object_name %>(common_id, _stream) do
+        %{id: id} = common_id
+
+        record = Repo.get(<%= model_module %>, id)
+
+        case record do
+          nil ->
+            Common.ActionResult.new(%{status: "failed", message: "can't find record"})
+
+          _ ->
+            record
+            |> Repo.delete
+            |> case do
+              {:ok, _} ->
+                Common.ActionResult.new(%{status: "success", message: "record delete success"})
+
+              {:error, _} ->
+                Common.ActionResult.new(%{status: "failed", message: "delete failed"})
+            end
+        end
+      end
+
+      defp transform_errors(changeset) do
+        changeset
+        |> Ecto.Changeset.traverse_errors(&format_error/1)
+        |> Enum.map(fn {key, value} ->
+          %{key: key, message: value}
+        end)
+      end
+
+      defp format_error({msg, opts}) do
+        Enum.reduce(opts, msg, fn {key, value}, acc ->
+          String.replace(acc, "%{#{key}}", to_string(value))
+        end)
+      end
+
+      def paginate_with(query, pagination) do
+        if is_nil(pagination) do
+          query
+        else
+          offset = Map.get(pagination, :offset, 0)
+          limit = Map.get(pagination, :limit, 10)
+          from(q in query, limit: ^limit, offset: ^offset)
+        end
+      end
+
+      def model_ids_filter(query, ids_map) do
+        m2m_fields = many_to_many_fields()
+
+        if Enum.empty?(m2m_fields) do
+          ids_filter(query, ids_map)
+        else
+          {_, cast_ids_map} = Map.split(ids_map, [:__struct__])
+          m2m_fields_keys = Enum.map(m2m_fields, Map.get(&1, :ids_name))
+
+          {m2m_map, normal_map} = Map.split(cast_ids_map, m2m_fields_keys)
+
+          query = ids_filter(query, normal_map)
+
+          Enum.reduce(m2m_map, query, fn {key, value}, acc ->
+            if value == nil || Enum.empty?(value) do
+              acc
+            else
+              module = Map.get(m2m_map, key)
+
+              singleton_key =
+                key
+                |> Atom.to_string()
+                |> Inflex.singularize()
+                |> String.to_atom()
+
+              sub_query =
+                from(
+                  x in module,
+                  where: field(x, ^singleton_key) in ^value
+                )
+
+              from(
+                q in query,
+                join: qx in subquery(sub_query), on: qx.<%= object_name %>_id == q.id
+              )
+          end)
+        end
+      end
+
+      defp many_to_many_fields, do: <%= many_to_many_fields %>
+
+      def order_with(query, _item), do: query
+
+      def filter_with(query, _item), do: query
+
+      defoverridable Module.definitions_in(__MODULE__, :def)
+    <% end %>
+    end
+  end
 end

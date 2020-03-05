@@ -57,10 +57,10 @@ defmodule QasMicro.Generator.Database.Schema do
     defmodule <%= schema_module %> do
       use Yacto.Schema, dbname: <%= schema_database %>
 
+    <%= if primary_key do %>
       @primary_key {:id, :string, autogenerate: {UUID, :uuid4, []}}
       @primary_key_meta %{id: [size: 64]}
-
-    <%= unless primary_key do %>
+    <% else %>
       @primary_key false
     <% end %>
 

@@ -1,0 +1,59 @@
+# auth methods
+<%= if auth do %>
+  def create_auth_<%= object_name %>(input, _stream) do
+    auth_input = Map.drop(input, [:__struct__, :user])
+
+    case auth(auth_input) do
+      {:ok, result} ->
+        <%= Macro.camelize(application_name) %>.Auth<%= Macro.camelize(object_name) %>.new(
+          <%= object_name %>: Map.drop(result, [:__struct__]),
+          app: "<%= application_name %>",
+          model: "<%= object_name %>",
+          id: result.id
+        )
+
+      {:error, _} ->
+        <%= Macro.camelize(application_name) %>.Auth<%= Macro.camelize(object_name) %>.new(
+          <%= object_name %>: nil,
+          app: "<%= application_name %>",
+          model: "<%= object_name %>",
+          id: nil
+        )
+    end
+  end
+<% end %>
+
+<%= if auth do %>
+  def auth(input) do
+    with {:ok, user} <- sign_in(input) do
+      {:ok, user}
+    else
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  defp sign_in(input) do
+    {password, cast_input} = Map.pop(input, :password)
+    cast_input_keyword = QasMicro.Util.Helper.map_to_keyword(cast_input)
+
+    user = Repo.get_by(<%= model_module %>, cast_input_keyword)
+
+    if password do
+      # password authenticate
+      check_result =
+        case user do
+          nil -> Bcrypt.no_user_verify()
+          _ -> Bcrypt.verify_pass(password, user.password_digest)
+        end
+
+      if check_result do
+        {:ok, user}
+      else
+        {:error, "user does not exist or wrong password"}
+      end
+    else
+      {:error, "user does not exist or wrong password"}
+    end
+  end
+<% end %>

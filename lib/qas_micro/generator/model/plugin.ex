@@ -1,7 +1,7 @@
 defmodule QasMicro.Generator.Model.Plugin do
   use QasMicroGenetator.Template
 
-  @external_resource Path.join(__DIR__, "model.eex")
+  @external_resource Path.join(__DIR__, "plugin.eex")
 
   def render(
         config_module,
