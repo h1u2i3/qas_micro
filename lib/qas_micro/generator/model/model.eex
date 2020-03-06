@@ -121,11 +121,15 @@ defmodule <%= model_plugin_module %> do
       def list_<%= object_name %>(common_id, _stream) do
         %{id: id} = common_id
 
-        __MODULE__
-        |> Repo.get(id)
-        |> Kernel.||(%{})
-        |> Map.drop([:__struct__])
-        |> <%= Macro.camelize(application_name) %>.<%= Macro.camelize(object_name) %>.new()
+        result = Repo.get(__MODULE__, id)
+
+        if result do
+          result
+          |> Map.drop([:__struct__])
+          |> <%= Macro.camelize(application_name) %>.<%= Macro.camelize(object_name) %>.new()
+        else
+          raise(GRPC.RPCError, status: :unknown, message: "record not found with id #{id}")
+        end
       end
 
       def list_<%= Inflex.pluralize(object_name) %>(params, _stream) do
