@@ -2,4 +2,7 @@ defmodule <%= model_module %> do
   use <%= model_plugin_module %>
 
   # Write your own hooks for specific handler
+  <%= if polymorphic do %>
+  def list_<%= Inflex.pluralize(object_name) %>(input, _stream), do: []
+  <% end %>
 end

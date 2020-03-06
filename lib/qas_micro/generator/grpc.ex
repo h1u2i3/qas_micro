@@ -1,6 +1,4 @@
 defmodule QasMicro.Generator.Grpc do
-  import QasMicro.Util.Helper
-
   def render_endpoint(config_module) do
     application_name = config_module.name()
     camel_app_name = Macro.camelize(application_name)
@@ -27,50 +25,55 @@ defmodule QasMicro.Generator.Grpc do
 
   defp object_method_template(config_module, object) do
     object_name = object.name
-    auth_enabled = plugin_enabled?(object, :auth)
+    auth_enabled = Map.get(object, :auth, false)
+    polymorphic = Map.get(object, :polymorphic, false)
     model_module = config_module.model_module(object_name)
 
-    custom_query_fields =
-      object
-      |> Map.get(:query, [])
-      |> Enum.map(fn item ->
-        """
-        defdelegate #{Map.get(item, :name)}(input, stream), to: #{model_module}
-        """
-      end)
-      |> Enum.join("\n")
+    if !polymorphic do
+      custom_query_fields =
+        object
+        |> Map.get(:query, [])
+        |> Enum.map(fn item ->
+          """
+          defdelegate #{Map.get(item, :name)}(input, stream), to: #{model_module}
+          """
+        end)
+        |> Enum.join("\n")
 
-    custom_mutation_fields =
-      object
-      |> Map.get(:mutation, [])
-      |> Enum.map(fn item ->
-        """
-        defdelegate #{Map.get(item, :name)}(input, stream), to: #{model_module}
-        """
-      end)
-      |> Enum.join("")
+      custom_mutation_fields =
+        object
+        |> Map.get(:mutation, [])
+        |> Enum.map(fn item ->
+          """
+          defdelegate #{Map.get(item, :name)}(input, stream), to: #{model_module}
+          """
+        end)
+        |> Enum.join("")
 
-    if auth_enabled do
-      """
-      defdelegate list_#{object_name}(common_id, stream), to: #{model_module}
-      defdelegate list_#{Inflex.pluralize(object_name)}(params, stream), to: #{model_module}
-      defdelegate create_#{object_name}(create_input, stream), to: #{model_module}
-      defdelegate update_#{object_name}(update_input, stream), to: #{model_module}
-      defdelegate delete_#{object_name}(common_id, stream), to: #{model_module}
-      defdelegate create_auth_#{object_name}(input, stream), to: #{model_module}
-      #{custom_query_fields}
-      #{custom_mutation_fields}
-      """
+      if auth_enabled do
+        """
+        defdelegate list_#{object_name}(common_id, stream), to: #{model_module}
+        defdelegate list_#{Inflex.pluralize(object_name)}(params, stream), to: #{model_module}
+        defdelegate create_#{object_name}(create_input, stream), to: #{model_module}
+        defdelegate update_#{object_name}(update_input, stream), to: #{model_module}
+        defdelegate delete_#{object_name}(common_id, stream), to: #{model_module}
+        defdelegate create_auth_#{object_name}(input, stream), to: #{model_module}
+        #{custom_query_fields}
+        #{custom_mutation_fields}
+        """
+      else
+        """
+        defdelegate list_#{object_name}(common_id, stream), to: #{model_module}
+        defdelegate list_#{Inflex.pluralize(object_name)}(params, stream), to: #{model_module}
+        defdelegate create_#{object_name}(create_input, stream), to: #{model_module}
+        defdelegate update_#{object_name}(update_input, stream), to: #{model_module}
+        defdelegate delete_#{object_name}(common_id, stream), to: #{model_module}
+        #{custom_query_fields}
+        #{custom_mutation_fields}
+        """
+      end
     else
-      """
-      defdelegate list_#{object_name}(common_id, stream), to: #{model_module}
-      defdelegate list_#{Inflex.pluralize(object_name)}(params, stream), to: #{model_module}
-      defdelegate create_#{object_name}(create_input, stream), to: #{model_module}
-      defdelegate update_#{object_name}(update_input, stream), to: #{model_module}
-      defdelegate delete_#{object_name}(common_id, stream), to: #{model_module}
-      #{custom_query_fields}
-      #{custom_mutation_fields}
-      """
+      ""
     end
   end
 

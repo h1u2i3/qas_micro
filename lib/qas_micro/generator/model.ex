@@ -1,8 +1,6 @@
 defmodule QasMicro.Generator.Model do
   use QasMicroGenetator.Template
 
-  import QasMicro.Util.Helper
-
   alias QasMicro.Util.Unit
   alias QasMicro.Util.Map, as: QMap
 
@@ -14,6 +12,7 @@ defmodule QasMicro.Generator.Model do
 
     table_name = Map.get(object, :table_name, Inflex.pluralize(object_name))
     timestamp = Map.get(object, :timestamp, true)
+    polymorphic = Map.get(object, :polymorphic, false)
     join_table = Map.get(object, :join_table, false)
     password = Map.get(object, :password, false)
     unique_number = Map.get(object, :unique_number, false)
@@ -25,7 +24,10 @@ defmodule QasMicro.Generator.Model do
     model_plugin_module = config_module.plugin_model_module(object_name)
 
     field_schema = QasMicro.Generator.Model.Field.render(object)
-    relation_schema = QasMicro.Generator.Model.Relation.render(config_module, object)
+    # TODO
+    # No need with the relationship between models
+    # we use dataloader to handle relationship in qas_rpc
+    # relation_schema = QasMicro.Generator.Model.Relation.render(config_module, object)
     validations = QasMicro.Generator.Model.Validation.render(object)
 
     all_fields = all_fields(object)
@@ -35,8 +37,7 @@ defmodule QasMicro.Generator.Model do
     # Add special handling for many_to_many relationships
     many_to_many_fields = many_to_many_fields(config_module, object)
 
-    object
-    |> Map.eex_template_string()
+    eex_template_string()
     |> EEx.eval_string(
       # modules
       config_module: config_module,
@@ -49,7 +50,8 @@ defmodule QasMicro.Generator.Model do
       table_name: table_name,
       # schema
       field_schema: field_schema,
-      relation_schema: relation_schema,
+      # TODO
+      # relation_schema: relation_schema,
       timestamp: timestamp,
       join_table: join_table,
       # the fields
@@ -63,6 +65,7 @@ defmodule QasMicro.Generator.Model do
       # plugin
       password: password,
       unique_number: unique_number,
+      polymorphic: polymorphic,
       geometry: geometry
     )
     |> config_module.save_file("#{object_name}.ex", "plugin/model")
@@ -71,7 +74,8 @@ defmodule QasMicro.Generator.Model do
       config_module,
       object_name,
       model_module,
-      model_plugin_module
+      model_plugin_module,
+      polymorphic
     )
   end
 
@@ -79,13 +83,17 @@ defmodule QasMicro.Generator.Model do
     object
     |> QMap.get(:field, [])
     |> Enum.filter(&(!Enum.member?(@relation_keys, &1.type)))
-    |> Kernel.++(Enum.filter(QMap.get(object, :schema, []), &Map.get(&1, :virtual)))
     |> Enum.map(&String.to_atom(&1.name))
     |> Unit.new()
   end
 
   defp create_fields(object) do
-    origin_fields = origin_fields(object)
+    origin_fields =
+      object
+      |> QMap.get(:field, [])
+      |> Enum.filter(&(!Enum.member?(@relation_keys, &1.type)))
+      |> Enum.filter(&Map.get(&1, :create, true))
+      |> Enum.map(&Map.get(&1, :name))
 
     if Map.get(object, :password, false) do
       (origin_fields -- ["password_digest"]) ++ ["password"]
@@ -97,7 +105,12 @@ defmodule QasMicro.Generator.Model do
   end
 
   defp update_fields(object) do
-    origin_fields = origin_fields(object)
+    origin_fields =
+      object
+      |> QMap.get(:field, [])
+      |> Enum.filter(&(!Enum.member?(@relation_keys, &1.type)))
+      |> Enum.filter(&Map.get(&1, :update, true))
+      |> Enum.map(&Map.get(&1, :name))
 
     if Map.get(object, :password, false) do
       Enum.filter(origin_fields, &(!String.contains?(&1, "password")))
@@ -125,18 +138,5 @@ defmodule QasMicro.Generator.Model do
     end)
     |> Enum.into(%{})
     |> Unit.new()
-  end
-
-  defp origin_fields(object) do
-    object
-    |> Map.get(:schema, [])
-    |> Enum.filter(&Map.get(&1, :virtual, false))
-    |> Kernel.++(
-      object
-      |> QMap.get(:field, [])
-      |> Enum.filter(&(!Enum.member?(@relation_keys, &1.type)))
-    )
-    |> Enum.filter(&Map.get(&1, :create, true))
-    |> Enum.map(&Map.get(&1, :name))
   end
 end

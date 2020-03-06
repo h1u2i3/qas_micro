@@ -4,17 +4,15 @@ defmodule QasMicro.Generator.Database.Index do
   alias QasMicro.Util.Map, as: QMap
   alias QasMicro.Util.Sigil, as: QSigil
 
-  def render(object, header) do
-    table_name =
-      if header do
-        header <> "_" <> Map.get(object, :table_name, Inflex.pluralize(object.name))
-      else
-        Map.get(object, :table_name, Inflex.pluralize(object.name))
-      end
+  @relation_keys ["belongs_to", "has_many", "has_one"]
+
+  def render(object) do
+    table_name = Map.get(object, :table_name, Inflex.pluralize(object.name))
 
     object
     |> Map.get(:field, [])
-    |> add_plugin_fields(object)
+    |> Enum.filter(&(!Enum.member?(@relation_keys, &1.type)))
+    |> Enum.filter(&(!Map.get(&1, :virtual, false)))
     |> Enum.map(&render_single(&1, table_name))
     |> Enum.filter(& &1)
   end
@@ -25,21 +23,8 @@ defmodule QasMicro.Generator.Database.Index do
     |> render_to_string
   end
 
-  defp add_plugin_fields(fields, object) do
-    object
-    |> QMap.get(:plugin, [])
-    |> Enum.reduce(fields, fn
-      {:wechat, true}, acc -> [%{name: "wechat_digest", type: "index"} | acc]
-      {:unique_number, true}, acc -> [%{name: "unique_number", type: "index"} | acc]
-      _, acc -> acc
-    end)
-  end
-
   defp extract_index_field(field, table_name) do
     Enum.reduce(field, %{}, fn
-      {:type, "index"}, acc ->
-        QMap.put(acc, :type, :index)
-
       {:index, true}, acc ->
         QMap.put(acc, :type, :index)
 

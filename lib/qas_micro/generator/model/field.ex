@@ -53,24 +53,16 @@ defmodule QasMicro.Generator.Model.Field do
   end
 
   defp add_plugin_fields(fields, object) do
-    object
-    |> QMap.get(:plugin, [])
-    |> Enum.reduce(fields, fn
-      {:wechat, true}, acc ->
-        [%{name: "wechat_digest", type: "string"} | acc]
-
-      {:password, true}, acc ->
-        [
-          %{name: "password_digest", type: "string"},
-          %{name: "password", type: "string", virtual: true} | acc
-        ]
-
-      {:unique_number, true}, acc ->
-        [%{name: "unique_number", type: "string"} | acc]
-
-      _, acc ->
-        acc
-    end)
+    # TODO
+    # maybe need add some other plugin fields
+    if Map.get(object, :password) do
+      [
+        %{name: "password_digest", type: "string"},
+        %{name: "password", type: "string", virtual: true} | fields
+      ]
+    else
+      fields
+    end
   end
 
   defp arange_attributes(field) do

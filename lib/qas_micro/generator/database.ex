@@ -4,9 +4,10 @@ defmodule QasMicro.Generator.Database do
   end
 
   def render_schema(config_module) do
-    Enum.each(
-      config_module.object(),
-      &QasMicro.Generator.Database.Schema.render(config_module, &1)
-    )
+    # TODO
+    # No need to render schema for polymorphic
+    config_module.object()
+    |> Enum.filter(fn item -> !Map.get(item, :polymorphic, false) end)
+    |> Enum.each(&QasMicro.Generator.Database.Schema.render(config_module, &1))
   end
 end

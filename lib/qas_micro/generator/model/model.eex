@@ -11,38 +11,53 @@ defmodule <%= model_plugin_module %> do
 
       alias <%= repo_module_name %>
 
-      <%= if join_table do %>
+  <%= if !polymorphic do %>
+    <%= if join_table do %>
       @primary_key false
-      <% else %>
+    <% else %>
       @primary_key {:id, :string, autogenerate: {UUID, :uuid4, []}}
-      <% end %>
+    <% end %>
 
-      schema "<%= table_name %>" do<%= for field <- field_schema do %>
-        <%= field %><% end %><%= for relation <- relation_schema do %>
-        <%= relation %><% end %>
-        <%= if(timestamp, do: "timestamps(inserted_at: :created_at, type: :integer, autogenerate: {:os, :system_time, [:seconds]})") %>
+      schema "<%= table_name %>" do
+      <%= for field <- field_schema do %>
+        <%= field %>
+      <% end %>
+      <%= if timestamp do %>
+        timestamps(inserted_at: :created_at, type: :integer, autogenerate: {:os, :system_time, [:seconds]})
+      <% end %>
       end
 
-      <%= if password do %>
-      @password_fields [:password, :password_confirmation]<% end %>
+    <%= if password do %>
+      @password_fields [:password, :password_confirmation]
+    <% end %>
 
       def create_changeset(struct, params \\ %{}) do
         struct
-        |> Ecto.Changeset.cast(params, create_fields())<%= for validation <- create_validation do %>
-        <%= validation %><% end %><%= if password do %>
-        |> generate_password_digest()<% end %><%= if unique_number do %>
-        |> generate_unique_number()<% end %><%= if geometry do %>
+        |> Ecto.Changeset.cast(params, create_fields())
+      <%= for validation <- create_validation do %>
+        <%= validation %>
+      <% end %>
+      <%= if password do %>
+        |> generate_password_digest()
+      <% end %>
+      <%= if unique_number do %>
+        |> generate_unique_number()
+      <% end %>
+      <%= if geometry do %>
         |> cast_geometry()
-        <% end %>
+      <% end %>
       end
 
       def update_changeset(struct, params \\ %{}) do
         struct
         |> Ecto.Changeset.change()
-        |> Ecto.Changeset.cast(params, update_fields())<%= for validation <- update_validation do %>
-        <%= validation %><% end %><%= if geometry do %>
+        |> Ecto.Changeset.cast(params, update_fields())
+      <%= for validation <- update_validation do %>
+        <%= validation %>
+      <% end %>
+      <%= if geometry do %>
         |> cast_geometry()
-        <% end %>
+      <% end %>
       end
 
     <%= if geometry do %>
@@ -229,7 +244,7 @@ defmodule <%= model_plugin_module %> do
           ids_filter(query, ids_map)
         else
           {_, cast_ids_map} = Map.split(ids_map, [:__struct__])
-          m2m_fields_keys = Enum.map(m2m_fields, Map.get(&1, :ids_name))
+          m2m_fields_keys = Enum.map(m2m_fields, &Map.get(&1, :ids_name))
 
           {m2m_map, normal_map} = Map.split(cast_ids_map, m2m_fields_keys)
 
@@ -257,6 +272,7 @@ defmodule <%= model_plugin_module %> do
                 q in query,
                 join: qx in subquery(sub_query), on: qx.<%= object_name %>_id == q.id
               )
+            end
           end)
         end
       end
@@ -266,9 +282,9 @@ defmodule <%= model_plugin_module %> do
       def order_with(query, _item), do: query
 
       def filter_with(query, _item), do: query
+  <% end %>
 
       defoverridable Module.definitions_in(__MODULE__, :def)
-    <% end %>
     end
   end
 end

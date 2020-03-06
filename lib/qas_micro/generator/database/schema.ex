@@ -2,42 +2,21 @@ defmodule QasMicro.Generator.Database.Schema do
   import QasMicro.Util.Helper
 
   alias QasMicro.Util.Unit
-  alias QasMicro.Util.Map, as: QMap
-  alias QasMicro.Util.Sigil, as: QSigil
 
   def render(config_module, object) do
-    polymorphic = QMap.get(object, :"plugin.polymorphic")
-
-    sub_table_headers =
-      if polymorphic do
-        QSigil.parse(polymorphic)
-      else
-        [nil]
-      end
-
-    Enum.each(sub_table_headers, &render_schema_template(config_module, object, &1))
+    render_schema_template(config_module, object)
   end
 
-  defp render_schema_template(config_module, object, header) do
+  defp render_schema_template(config_module, object) do
     timestamp = Map.get(object, :timestamp, true)
     primary_key = Map.get(object, :primary_key, true)
     schema_database = String.to_atom(config_module.env_database_name())
 
-    schema_name =
-      if header do
-        header <> "_" <> get_value_or_raise(object, :name)
-      else
-        get_value_or_raise(object, :name)
-      end
+    schema_name = get_value_or_raise(object, :name)
 
     schema_module = config_module.migration_module(schema_name)
 
-    schema_table =
-      if header do
-        header <> "_" <> Map.get(object, :table_name, Inflex.pluralize(schema_name))
-      else
-        Map.get(object, :table_name, Inflex.pluralize(schema_name))
-      end
+    schema_table = Map.get(object, :table_name, Inflex.pluralize(schema_name))
 
     schema_template()
     |> EEx.eval_string(
@@ -47,7 +26,7 @@ defmodule QasMicro.Generator.Database.Schema do
       timestamp: timestamp,
       primary_key: primary_key,
       field_expressions: QasMicro.Generator.Database.Field.render(object),
-      index_expressions: QasMicro.Generator.Database.Index.render(object, header)
+      index_expressions: QasMicro.Generator.Database.Index.render(object)
     )
     |> config_module.save_file("#{schema_name}.ex", "migration")
   end

@@ -7,7 +7,7 @@ defmodule QasMicro.Generator.Database.Field do
   # will be effect in some other part of render
   # but should be removed in fied render
   @plugin_settings [:update, :create, :role, :filter, :index, :unique]
-  @relation_keys [:belongs_to, :has_many, :has_one]
+  @relation_keys ["belongs_to", "has_many", "has_one"]
 
   def render(object) do
     object
@@ -27,18 +27,16 @@ defmodule QasMicro.Generator.Database.Field do
   defp filter_fields(object) do
     object
     |> QMap.get(:field, [])
-    |> Enum.filter(&(!Enum.member?(@relation_keys, String.to_atom(&1.type))))
+    |> Enum.filter(&(!Enum.member?(@relation_keys, &1.type)))
+    |> Enum.filter(&(!Map.get(&1, :virtual, false)))
   end
 
   defp add_plugin_fields(fields, object) do
-    object
-    |> QMap.get(:plugin, [])
-    |> Enum.reduce(fields, fn
-      {:wechat, true}, acc -> [%{name: "wechat_digest", type: "string"} | acc]
-      {:password, true}, acc -> [%{name: "password_digest", type: "string"} | acc]
-      {:unique_number, true}, acc -> [%{name: "unique_number", type: "string"} | acc]
-      _, acc -> acc
-    end)
+    if Map.get(object, :password, false) do
+      [%{name: "password_digest", type: "string"} | fields]
+    else
+      fields
+    end
   end
 
   defp remove_pulgin_setting(field) do
