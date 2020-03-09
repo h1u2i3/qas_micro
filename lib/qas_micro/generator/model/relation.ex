@@ -8,11 +8,15 @@ defmodule QasMicro.Generator.Model.Relation do
   @relation_keys [:has_many, :many_to_many, :has_one, :belongs_to, :embeds_one, :embeds_many]
 
   def render(config_module, object) do
-    object
-    |> Map.get(:field, [])
-    |> Enum.filter(&Enum.member?(@relation_keys, &1.type |> String.to_atom()))
-    |> Enum.filter(&(!Map.get(&1, :struct)))
-    |> Enum.map(&render_single(config_module, &1))
+    if quick_test_mode() do
+      []
+    else
+      object
+      |> Map.get(:field, [])
+      |> Enum.filter(&Enum.member?(@relation_keys, &1.type |> String.to_atom()))
+      |> Enum.filter(&(!Map.get(&1, :struct) && !Map.get(&1, :polymorphic, false)))
+      |> Enum.map(&render_single(config_module, &1))
+    end
   end
 
   def render_single(config_module, field) do
@@ -72,11 +76,12 @@ defmodule QasMicro.Generator.Model.Relation do
     end)
   end
 
+  @extra_keys [:name, :target, :type, :key, :many_to_many]
   defp render_to_string(%{type: type} = attributes) when type in @relation_keys do
     {type, [], []}
     |> pipe_into(0, QMap.get(attributes, :name))
     |> pipe_into(1, QMap.get(attributes, :target))
-    |> pipe_into(2, attributes |> QMap.drop([:name, :target, :type]) |> map_to_keyword)
+    |> pipe_into(2, attributes |> QMap.drop(@extra_keys) |> map_to_keyword)
     |> Macro.to_string()
   end
 
@@ -85,9 +90,13 @@ defmodule QasMicro.Generator.Model.Relation do
   defp render_to_through_string(%{type: type} = attributes) when type in @relation_keys do
     {type, [], []}
     |> pipe_into(0, QMap.get(attributes, :name))
-    |> pipe_into(1, attributes |> QMap.drop([:name, :target, :type]) |> map_to_keyword)
+    |> pipe_into(1, attributes |> QMap.drop(@extra_keys) |> map_to_keyword)
     |> Macro.to_string()
   end
 
   defp render_to_through_string(_), do: nil
+
+  defp quick_test_mode do
+    System.get_env("QUICK_TEST") || false
+  end
 end

@@ -56,11 +56,14 @@ defmodule QasMicro.Generator.Database.Field do
 
   defp handle_field_type(type, acc) do
     case type do
-      :text -> acc |> QMap.put(:type, :string) |> QMap.put(:"meta.type", :text)
-      type when type in [:geometry] -> QMap.put(acc, :type, Geo.PostGIS.Geometry)
-      type when type in [:file, :json] -> QMap.put(acc, :type, :map)
-      type when type in [:jsons, :files] -> QMap.put(acc, :type, {:array, :map})
-      _ -> QMap.put(acc, :type, type)
+      type when type in [:geometry] ->
+        QMap.put(acc, :type, Geo.PostGIS.Geometry)
+
+      type when type in [:text, :file, :json, :jsons, :files] ->
+        acc |> QMap.put(:type, :string) |> QMap.put(:"meta.type", :text)
+
+      _ ->
+        QMap.put(acc, :type, type)
     end
   end
 

@@ -46,7 +46,13 @@ defmodule QasMicro.Generator.Database.Schema do
       schema "<%= schema_table %>" do<%= for field <- field_expressions do %>
         <%= field %><% end %><%= for index <- index_expressions do %>
         <%= index %><% end %><%= if timestamp do %>
-        timestamps(inserted_at: :created_at, type: :integer, autogenerate: {:os, :system_time, [:seconds]})
+
+        timestamps(
+          inserted_at: :created_at,
+          type: :integer,
+          meta: [type: :bigint],
+          autogenerate: {:os, :system_time, [:milli_seconds]}
+        )
         <% end %>
       end
     end

@@ -7,14 +7,14 @@ defmodule QasMicro.Generator.Model.Field do
   # the options keys from ecto document
   @options_keys [:default, :source, :autogenerate, :read_after_writes, :virtual, :primary_keys]
   # relation keys can be used in qas
-  @relation_keys [:has_many, :many_to_many, :has_one, :belongs_to, :embeds_one, :embeds_many]
+  @relation_keys [:has_many, :has_one, :belongs_to]
 
   def render(object) do
     schema =
       object
       |> Map.get(:field, [])
       |> Enum.filter(&Enum.member?(@relation_keys, String.to_atom(&1.type)))
-      |> Enum.filter(&(!Map.get(&1, :struct)))
+      |> Enum.filter(&(!Map.get(&1, :struct) && !Map.get(&1, :polymorphic, false)))
 
     schema_names = get_value_from_map_list(schema, :name)
     schema_foreign_keys = get_value_from_map_list(schema, :foreign_key)
@@ -37,12 +37,16 @@ defmodule QasMicro.Generator.Model.Field do
   end
 
   defp filter_with_relation_field(item, schema_names, schema_targets, schema_foreign_keys) do
-    item_name = item.name
-    origin_name = String.replace(item_name, ~r/_id$/, "")
+    if quick_test_mode() do
+      true
+    else
+      item_name = item.name
+      origin_name = String.replace(item_name, ~r/_id$/, "")
 
-    !(origin_name in schema_names ||
-        origin_name in schema_targets ||
-        item_name in schema_foreign_keys)
+      !(origin_name in schema_names ||
+          origin_name in schema_targets ||
+          item_name in schema_foreign_keys)
+    end
   end
 
   defp get_value_from_map_list(list, key) do
@@ -89,10 +93,8 @@ defmodule QasMicro.Generator.Model.Field do
 
   defp handle_field_type(type, acc) do
     case type do
-      :text -> acc |> QMap.put(:type, :string)
       :geometry -> QMap.put(acc, :type, Geo.PostGIS.Geometry)
-      type when type in [:file, :json] -> QMap.put(acc, :type, :map)
-      type when type in [:jsons, :files] -> QMap.put(acc, :type, {:array, :map})
+      type when type in [:text, :file, :json, :jsons, :files] -> QMap.put(acc, :type, :string)
       _ -> QMap.put(acc, :type, type)
     end
   end
@@ -107,5 +109,9 @@ defmodule QasMicro.Generator.Model.Field do
     |> pipe_into(1, QMap.get(attributes, :type))
     |> pipe_into(2, attributes |> QMap.drop([:name, :type]) |> map_to_keyword)
     |> Macro.to_string()
+  end
+
+  defp quick_test_mode do
+    System.get_env("QUICK_TEST") || false
   end
 end

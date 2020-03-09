@@ -11,7 +11,7 @@ defmodule <%= model_plugin_module %> do
 
       alias <%= repo_module_name %>
 
-  <%= if !polymorphic do %>
+<%= if !polymorphic do %>
     <%= if join_table do %>
       @primary_key false
     <% else %>
@@ -19,11 +19,11 @@ defmodule <%= model_plugin_module %> do
     <% end %>
 
       schema "<%= table_name %>" do
-      <%= for field <- field_schema do %>
-        <%= field %>
+      <%= for field <- field_schema do %><%= field %>
+      <% end %><%= for relation <- relation_schema do %><%= relation %>
       <% end %>
       <%= if timestamp do %>
-        timestamps(inserted_at: :created_at, type: :integer, autogenerate: {:os, :system_time, [:seconds]})
+        timestamps(inserted_at: :created_at, type: :integer, autogenerate: {:os, :system_time, [:milli_seconds]})
       <% end %>
       end
 
@@ -60,6 +60,19 @@ defmodule <%= model_plugin_module %> do
       <% end %>
       end
 
+      # return empty struct
+      def new, do: %__MODULE__{}
+
+      # all fields can be overrideable
+      def all_fields,  do: <%= all_fields %>
+
+      # create fields can be overrideable
+      def create_fields, do: <%= create_fields %>
+
+      # update fields can be overrideable
+      def update_fields, do: <%= update_fields %>
+
+  <%= if !join_table do %>
     <%= if geometry do %>
       def cast_geometry(changeset) do
         if Enum.empty?(changeset.errors) do
@@ -104,18 +117,6 @@ defmodule <%= model_plugin_module %> do
         end
       end
     <% end %>
-
-      # return empty struct
-      def new, do: %__MODULE__{}
-
-      # all fields can be overrideable
-      def all_fields,  do: <%= all_fields %>
-
-      # create fields can be overrideable
-      def create_fields, do: <%= create_fields %>
-
-      # update fields can be overrideable
-      def update_fields, do: <%= update_fields %>
 
       # the methods used in grpc services
       def list_<%= object_name %>(common_id, _stream) do
@@ -221,7 +222,7 @@ defmodule <%= model_plugin_module %> do
         changeset
         |> Ecto.Changeset.traverse_errors(&format_error/1)
         |> Enum.map(fn {key, value} ->
-          %{key: key, message: value}
+          %{key: "#{key}", message: Enum.join(value, "\n")}
         end)
       end
 
@@ -248,7 +249,7 @@ defmodule <%= model_plugin_module %> do
           ids_filter(query, ids_map)
         else
           {_, cast_ids_map} = Map.split(ids_map, [:__struct__])
-          m2m_fields_keys = Enum.map(m2m_fields, &Map.get(&1, :ids_name))
+          m2m_fields_keys = Map.keys(m2m_fields)
 
           {m2m_map, normal_map} = Map.split(cast_ids_map, m2m_fields_keys)
 
@@ -287,6 +288,7 @@ defmodule <%= model_plugin_module %> do
 
       def filter_with(query, _item), do: query
   <% end %>
+<% end %>
 
       defoverridable Module.definitions_in(__MODULE__, :def)
     end

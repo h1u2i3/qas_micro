@@ -27,7 +27,7 @@ defmodule QasMicro.Generator.Model do
     # TODO
     # No need with the relationship between models
     # we use dataloader to handle relationship in qas_rpc
-    # relation_schema = QasMicro.Generator.Model.Relation.render(config_module, object)
+    relation_schema = QasMicro.Generator.Model.Relation.render(config_module, object)
     validations = QasMicro.Generator.Model.Validation.render(object)
 
     all_fields = all_fields(object)
@@ -51,11 +51,11 @@ defmodule QasMicro.Generator.Model do
       # schema
       field_schema: field_schema,
       # TODO
-      # relation_schema: relation_schema,
+      relation_schema: relation_schema,
       timestamp: timestamp,
       join_table: join_table,
       # the fields
-      all_fields: Unit.new(all_fields),
+      all_fields: all_fields,
       create_fields: create_fields,
       update_fields: update_fields,
       many_to_many_fields: many_to_many_fields,
