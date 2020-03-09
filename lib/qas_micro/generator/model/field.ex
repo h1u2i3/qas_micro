@@ -61,8 +61,7 @@ defmodule QasMicro.Generator.Model.Field do
     # maybe need add some other plugin fields
     if Map.get(object, :password) do
       [
-        %{name: "password_digest", type: "string"},
-        %{name: "password", type: "string", virtual: true} | fields
+        %{name: "password_digest", type: "string"} | fields
       ]
     else
       fields
