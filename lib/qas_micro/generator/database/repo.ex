@@ -15,6 +15,7 @@ defmodule QasMicro.Generator.Database.Repo do
     """
     defmodule <%= repo_module %> do
       use Ecto.Repo, otp_app: :<%= otp_app_name %>, adapter: Ecto.Adapters.Postgres
+      use QasMicro.Repo
     end
     """
   end

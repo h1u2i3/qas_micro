@@ -9,7 +9,15 @@ defmodule QasMicro.Generator.Model.Field do
   # relation keys can be used in qas
   @relation_keys [:has_many, :has_one, :belongs_to]
 
-  def render(object) do
+  @plugin_fields %{
+    password: %{name: "password_digest", type: "string"}
+  }
+
+  @config_fields %{
+    soft_delete: %{name: "deleted_at", type: "integer"}
+  }
+
+  def render(config_module, object) do
     schema =
       object
       |> Map.get(:field, [])
@@ -22,6 +30,7 @@ defmodule QasMicro.Generator.Model.Field do
 
     object
     |> QMap.get(:field, [])
+    |> add_config_fields(config_module)
     |> add_plugin_fields(object)
     |> Enum.filter(
       &filter_with_relation_field(&1, schema_names, schema_targets, schema_foreign_keys)
@@ -56,13 +65,31 @@ defmodule QasMicro.Generator.Model.Field do
     |> Enum.uniq()
   end
 
+  defp add_config_fields(fields, config_module) do
+    @config_fields
+    |> Enum.reduce(fields, fn {key, value}, acc ->
+      do_add_config_fields(config_module, acc, key, value)
+    end)
+  end
+
   defp add_plugin_fields(fields, object) do
-    # TODO
-    # maybe need add some other plugin fields
-    if Map.get(object, :password) do
-      [
-        %{name: "password_digest", type: "string"} | fields
-      ]
+    @plugin_fields
+    |> Enum.reduce(fields, fn {key, value}, acc ->
+      do_add_plugin_fields(object, acc, key, value)
+    end)
+  end
+
+  defp do_add_config_fields(config_module, fields, config_name, add_field) do
+    if apply(config_module, config_name, []) do
+      [add_field | fields]
+    else
+      fields
+    end
+  end
+
+  defp do_add_plugin_fields(object, fields, plugin, add_field) do
+    if Map.get(object, plugin, false) do
+      [add_field | fields]
     else
       fields
     end
@@ -92,6 +119,7 @@ defmodule QasMicro.Generator.Model.Field do
 
   defp handle_field_type(type, acc) do
     case type do
+      :int64 -> QMap.put(acc, :type, :integer)
       :geometry -> QMap.put(acc, :type, Geo.PostGIS.Geometry)
       type when type in [:text, :file, :json, :jsons, :files] -> QMap.put(acc, :type, :string)
       _ -> QMap.put(acc, :type, type)

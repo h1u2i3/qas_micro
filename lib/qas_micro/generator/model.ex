@@ -10,6 +10,8 @@ defmodule QasMicro.Generator.Model do
   def render(config_module, object) do
     object_name = object.name
 
+    soft_delete = config_module.soft_delete()
+
     table_name = Map.get(object, :table_name, Inflex.pluralize(object_name))
     timestamp = Map.get(object, :timestamp, true)
     polymorphic = Map.get(object, :polymorphic, false)
@@ -23,7 +25,7 @@ defmodule QasMicro.Generator.Model do
     model_module = config_module.model_module(object_name)
     model_plugin_module = config_module.plugin_model_module(object_name)
 
-    field_schema = QasMicro.Generator.Model.Field.render(object)
+    field_schema = QasMicro.Generator.Model.Field.render(config_module, object)
     # TODO
     # No need with the relationship between models
     # we use dataloader to handle relationship in qas_rpc
@@ -39,6 +41,8 @@ defmodule QasMicro.Generator.Model do
 
     eex_template_string()
     |> EEx.eval_string(
+      # soft delete
+      soft_delete: soft_delete,
       # modules
       config_module: config_module,
       model_module: model_module,

@@ -9,9 +9,18 @@ defmodule QasMicro.Generator.Database.Field do
   @plugin_settings [:update, :create, :role, :filter, :index, :unique]
   @relation_keys ["belongs_to", "has_many", "has_one"]
 
-  def render(object) do
+  @plugin_fields %{
+    password: %{name: "password_digest", type: "string"}
+  }
+
+  @config_fields %{
+    soft_delete: %{name: "deleted_at", type: "int64"}
+  }
+
+  def render(object, config_module) do
     object
     |> filter_fields()
+    |> add_config_fields(config_module)
     |> add_plugin_fields(object)
     |> Enum.map(&render_single/1)
     |> Enum.filter(& &1)
@@ -31,9 +40,31 @@ defmodule QasMicro.Generator.Database.Field do
     |> Enum.filter(&(!Map.get(&1, :virtual, false)))
   end
 
+  defp add_config_fields(fields, config_module) do
+    @config_fields
+    |> Enum.reduce(fields, fn {key, value}, acc ->
+      do_add_config_fields(config_module, acc, key, value)
+    end)
+  end
+
   defp add_plugin_fields(fields, object) do
-    if Map.get(object, :password, false) do
-      [%{name: "password_digest", type: "string"} | fields]
+    @plugin_fields
+    |> Enum.reduce(fields, fn {key, value}, acc ->
+      do_add_plugin_fields(object, acc, key, value)
+    end)
+  end
+
+  defp do_add_config_fields(config_module, fields, config_name, add_field) do
+    if apply(config_module, config_name, []) do
+      [add_field | fields]
+    else
+      fields
+    end
+  end
+
+  defp do_add_plugin_fields(object, fields, plugin, add_field) do
+    if Map.get(object, plugin, false) do
+      [add_field | fields]
     else
       fields
     end
@@ -56,6 +87,9 @@ defmodule QasMicro.Generator.Database.Field do
 
   defp handle_field_type(type, acc) do
     case type do
+      :int64 ->
+        acc |> QMap.put(:type, :integer) |> QMap.put(:"meta.type", :bigint)
+
       type when type in [:geometry] ->
         QMap.put(acc, :type, Geo.PostGIS.Geometry)
 

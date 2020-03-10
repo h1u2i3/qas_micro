@@ -26,9 +26,10 @@ defmodule QasMicro.Generator.Grpc do
   defp object_method_template(config_module, object) do
     object_name = object.name
     polymorphic = Map.get(object, :polymorphic, false)
+    join_table = Map.get(object, :join_table, false)
     model_module = config_module.model_module(object_name)
 
-    if !polymorphic do
+    if !polymorphic && !join_table do
       custom_query_fields =
         object
         |> Map.get(:query, [])

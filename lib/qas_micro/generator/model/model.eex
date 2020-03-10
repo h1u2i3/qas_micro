@@ -122,7 +122,10 @@ defmodule <%= model_plugin_module %> do
       def list_<%= object_name %>(common_id, _stream) do
         %{id: id} = common_id
 
-        result = Repo.get(__MODULE__, id)
+        result =
+          from(q in __MODULE__, where: q.id == ^id)<%= if soft_delete do %>
+          |> with_undeleted()<% end %>
+          |> Repo.one()
 
         if result do
           result
@@ -140,7 +143,8 @@ defmodule <%= model_plugin_module %> do
           params
           |> Map.take([:filter, :order, :paginate])
           |> Enum.reduce(__MODULE__, plural_query_reducer(__MODULE__))
-          |> model_ids_filter(ids_map)
+          |> model_ids_filter(ids_map)<%= if soft_delete do %>
+          |> with_undeleted()<% end %>
           |> Repo.all
           |> Enum.map(&Map.drop(&1, [:__struct__]))
 
@@ -206,8 +210,10 @@ defmodule <%= model_plugin_module %> do
             Common.ActionResult.new(%{status: "failed", message: "can't find record"})
 
           _ ->
-            record
-            |> Repo.delete
+            record<%= if soft_delete do %>
+            |> Repo.soft_delete
+            <% else %>
+            |> Repo.delete<% end %>
             |> case do
               {:ok, _} ->
                 Common.ActionResult.new(%{status: "success", message: "record delete success"})

@@ -14,7 +14,10 @@ defmodule QasMicro.Generator.Model.Relation do
       object
       |> Map.get(:field, [])
       |> Enum.filter(&Enum.member?(@relation_keys, &1.type |> String.to_atom()))
-      |> Enum.filter(&(!Map.get(&1, :struct) && !Map.get(&1, :polymorphic, false)))
+      |> Enum.filter(
+        &(!Map.get(&1, :struct) && !Map.get(&1, :polymorphic, false) &&
+            !Map.get(&1, :many_to_many, false))
+      )
       |> Enum.map(&render_single(config_module, &1))
     end
   end
