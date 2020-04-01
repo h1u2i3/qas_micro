@@ -105,7 +105,7 @@ defmodule QasMicro.Generator.Grpc do
     defmodule <%= camel_app_name %>.Transaction.Server do
       use GRPC.Server, service: QasMicro.Transaction.Service
 
-      alias QasMicro.Util.Map, QMap
+      alias QasMicro.Util.Map, as: QMap
       alias <%= camel_app_name %>.<%= camel_app_name %>.Server, as: Server
 
       def transaction(request_enum, _stream) do
