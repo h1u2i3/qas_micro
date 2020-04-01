@@ -113,7 +113,7 @@ defmodule QasMicro.Generator.Grpc do
           Enum.reduce(request_enum, [], fn %{action: action, input: input}, acc ->
             {:ok, cast_input} = assemble_input(input, acc)
 
-            // use an empty map to replace with the origin stream param in Server call
+            # use an empty map to replace with the origin stream param in Server call
             Server
             |> apply(String.to_atom(action), [cast_input, %{}])
             |> check_action_result(acc)
@@ -128,7 +128,7 @@ defmodule QasMicro.Generator.Grpc do
         end
       end
 
-      // check action result
+      # check action result
       defp check_action_result(result, params) do
         case result do
           %{errors: _} ->
@@ -142,7 +142,7 @@ defmodule QasMicro.Generator.Grpc do
         end
       end
 
-      // assemble the real input
+      # assemble the real input
       defp assemble_input(input, params) do
         case Jason.decode(input, keys: :atoms) do
           {:ok, input_map} ->
@@ -155,8 +155,8 @@ defmodule QasMicro.Generator.Grpc do
         end
       end
 
-      // key example:
-      // $1.user.id, $2.user.name
+      # key example:
+      # $1.user.id, $2.user.name
       defp value_in_binding(params, key) do
         if match = Regex.named_captures(~r/^\$(?<index>\d+)\.(?<chain>.+)/, key) do
           %{"index" => index, "chain" => chain} = match
