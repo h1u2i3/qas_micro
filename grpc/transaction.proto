@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.aman.yimei.transaction";
+option java_outer_classname = "Transaction";
+
+package qas_micro;
+
+message TransactionMessage {
+  string action = 1;
+  string input = 2;
+}
+
+message TransactionResult {
+  string status = 1;
+  string result = 2;
+}
+
+service Transaction {
+  rpc Transaction(stream TransactionMessage) returns (TransactionResult);
+}

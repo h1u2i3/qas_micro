@@ -9,7 +9,7 @@ defmodule QasMicro.Middleware.Config.Lexer do
          {:ok, keywords} <- :config_parser.parse(tokens) do
       Pipeline.assign(pipeline, :config, keywords)
     else
-      {:error, reason} ->
+      reason ->
         raise(reason)
     end
   end

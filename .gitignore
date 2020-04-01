@@ -8,5 +8,4 @@ erl_crash.dump
 qas_core-*.tar
 /src/*.erl
 /lib/account/
-/lib/grpc/
 /.elixir_ls
