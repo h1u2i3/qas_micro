@@ -116,22 +116,35 @@ defmodule QasMicro.Generator.Grpc do
             # use an empty map to replace with the origin stream param in Server call
             Server
             |> apply(String.to_atom(action), [cast_input, %{}])
-            |> check_action_result(acc)
+            |> check_action_result(action, acc)
           end)
         end)
         |> case do
           {:ok, result} ->
-            QasMicro.TransactionResult.new(%{status: "ok", result: List.last(result)})
+            QasMicro.TransactionResult.new(%{
+              status: "ok",
+              result:
+                result
+                |> List.last
+                |> struct_to_map
+                |> Jason.encode!
+            })
+
+          {:error, reason} when is_binary(reason) ->
+            QasMicro.TransactionResult.new(%{status: "error", result: reason})
 
           {:error, reason} ->
-            QasMicro.TransactionResult.new(%{status: "error", result: reason})
+            QasMicro.TransactionResult.new(%{status: "error", result: inspect(reason)})
         end
       end
 
       # check action result
-      defp check_action_result(result, params) do
+      defp check_action_result(result, action, params) do
         case result do
-          %{errors: _} ->
+          %{errors: []}  ->
+            Enum.concat(params, [result])
+
+          %{errors: errors}  ->
             <%= repo_name %>.rollback("#{action} return #{inspect(errors)}")
 
           %{status: "failed"} ->
@@ -146,9 +159,11 @@ defmodule QasMicro.Generator.Grpc do
       defp assemble_input(input, params) do
         case Jason.decode(input, keys: :atoms) do
           {:ok, input_map} ->
-            input
-            |> Enum.map(fn {key, value} -> {key, value_in_binding(params, value)} end)
-            |> Enum.into(%{})
+            {:ok,
+              input_map
+              |> Enum.map(fn {key, value} -> {key, value_in_binding(params, value)} end)
+              |> Enum.into(%{})
+            }
 
           {:error, _} ->
             <%= repo_name %>.rollback("JSON decode input with error")
@@ -157,15 +172,43 @@ defmodule QasMicro.Generator.Grpc do
 
       # key example:
       # $1.user.id, $2.user.name
-      defp value_in_binding(params, key) do
-        if match = Regex.named_captures(~r/^\$(?<index>\d+)\.(?<chain>.+)/, key) do
+      defp value_in_binding(params, map) when is_map(map) do
+        map
+        |> Enum.map(fn {key, value} -> {key, value_in_binding(params, value)} end)
+        |> Enum.into(%{})
+      end
+
+      defp value_in_binding(params, value) when is_binary(value) do
+        if match = Regex.named_captures(~r/^\$(?<index>\d+)\.(?<chain>.+)/, value) do
           %{"index" => index, "chain" => chain} = match
 
           params
-          |> Enum.at(String.to_integer(index))
+          |> Enum.at(String.to_integer(index) - 1)
           |> QMap.get(String.to_atom(chain))
+        else
+          value
         end
       end
+
+      defp value_in_binding(_params, value), do: value
+
+      defp struct_to_map(list) when is_list(list) do
+        Enum.map(list, fn item -> struct_to_map(item) end)
+      end
+
+      defp struct_to_map(%{__struct__: _} = struct) do
+        struct
+        |> Map.delete(:__struct__)
+        |> struct_to_map()
+      end
+
+      defp struct_to_map(map) when is_map(map) do
+        map
+        |> Enum.map(fn {key, value} -> {key, struct_to_map(value)} end)
+        |> Enum.into(%{})
+      end
+
+      defp struct_to_map(other), do: other
     end
     """
   end

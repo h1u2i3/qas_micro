@@ -8,8 +8,8 @@ defmodule QasMicro.TransactionMessage do
         }
   defstruct [:action, :input]
 
-  field :action, 1, type: :string
-  field :input, 2, type: :string
+  field(:action, 1, type: :string)
+  field(:input, 2, type: :string)
 end
 
 defmodule QasMicro.TransactionResult do
@@ -22,15 +22,15 @@ defmodule QasMicro.TransactionResult do
         }
   defstruct [:status, :result]
 
-  field :status, 1, type: :string
-  field :result, 2, type: :string
+  field(:status, 1, type: :string)
+  field(:result, 2, type: :string)
 end
 
 defmodule QasMicro.Transaction.Service do
   @moduledoc false
   use GRPC.Service, name: "qas_micro.Transaction"
 
-  rpc :Transaction, stream(QasMicro.TransactionMessage), QasMicro.TransactionResult
+  rpc(:Transaction, stream(QasMicro.TransactionMessage), QasMicro.TransactionResult)
 end
 
 defmodule QasMicro.Transaction.Stub do
