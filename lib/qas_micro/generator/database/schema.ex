@@ -1,8 +1,6 @@
 defmodule QasMicro.Generator.Database.Schema do
   import QasMicro.Util.Helper
 
-  alias QasMicro.Util.Unit
-
   def render(config_module, object) do
     render_schema_template(config_module, object)
   end
@@ -10,7 +8,7 @@ defmodule QasMicro.Generator.Database.Schema do
   defp render_schema_template(config_module, object) do
     timestamp = Map.get(object, :timestamp, true)
     primary_key = Map.get(object, :primary_key, true)
-    schema_database = String.to_atom(config_module.env_database_name())
+    database_name = config_module.database_name()
 
     schema_name = get_value_or_raise(object, :name)
 
@@ -21,7 +19,7 @@ defmodule QasMicro.Generator.Database.Schema do
     schema_template()
     |> EEx.eval_string(
       schema_module: schema_module,
-      schema_database: Unit.new(schema_database),
+      database_name: database_name,
       schema_table: schema_table,
       timestamp: timestamp,
       primary_key: primary_key,
@@ -32,9 +30,9 @@ defmodule QasMicro.Generator.Database.Schema do
   end
 
   defp schema_template do
-    """
+    ~S"""
     defmodule <%= schema_module %> do
-      use Yacto.Schema, dbname: <%= schema_database %>
+      use Yacto.Schema, dbname: String.to_atom("<%= database_name %>_#{System.get_env("MIX_ENV") || Mix.env()}")
 
     <%= if primary_key do %>
       @primary_key {:id, :string, autogenerate: {UUID, :uuid4, []}}
