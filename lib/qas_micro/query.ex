@@ -1,5 +1,6 @@
 defmodule QasMicro.Query do
   import Ecto.Query
+  alias QasMicro.Util.Helper
 
   def plural_query_reducer(module) do
     fn arg, query ->
@@ -13,7 +14,7 @@ defmodule QasMicro.Query do
 
         {:filter, filter} ->
           if filter do
-            query |> filter_with(filter, module)
+            query |> filter_with(Helper.to_ex_params(filter), module)
           else
             query
           end

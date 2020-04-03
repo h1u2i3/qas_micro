@@ -10,6 +10,7 @@ defmodule <%= model_plugin_module %> do
       import QasMicro.Util.Helper
 
       alias <%= repo_module_name %>
+      alias QasMicro.Util.Helper
 
 <%= if !polymorphic do %>
     <%= if join_table do %>
@@ -157,7 +158,7 @@ defmodule <%= model_plugin_module %> do
         {_, input} = Map.split(create_input, [:user])
 
         new()
-        |> create_changeset(input |> Map.drop([:__struct__]))
+        |> create_changeset(input |> Helper.to_ex_params())
         |> Repo.insert
         |> case do
           {:ok, item} ->
@@ -184,7 +185,7 @@ defmodule <%= model_plugin_module %> do
 
           _ ->
             record
-            |> update_changeset(input |> Map.drop([:__struct__]))
+            |> update_changeset(input |> Helper.to_ex_params())
             |> Repo.update
             |> case do
               {:ok, item} ->

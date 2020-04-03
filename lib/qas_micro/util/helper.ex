@@ -153,4 +153,24 @@ defmodule QasMicro.Util.Helper do
     |> List.last()
     |> Macro.underscore()
   end
+
+  def to_grpc_params(params) do
+    keys =
+      params
+      |> Map.keys()
+      |> Enum.join(",")
+
+    Map.put(params, :keys, keys)
+  end
+
+  def to_ex_params(params) do
+    keys = Map.get(params, :keys, "")
+
+    atom_keys =
+      keys
+      |> String.split(",")
+      |> Enum.map(&String.to_atom/1)
+
+    Map.take(params, atom_keys)
+  end
 end
