@@ -17,6 +17,6 @@ defmodule QasMicro.Generator.Model.Plugin do
       model_plugin_module: model_plugin_module,
       polymorphic: polymorphic
     )
-    |> config_module.save_file("#{object_name}.ex", "model")
+    |> config_module.save_file("#{object_name}.ex", "model", false)
   end
 end
