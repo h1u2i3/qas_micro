@@ -164,13 +164,17 @@ defmodule QasMicro.Util.Helper do
   end
 
   def to_ex_params(params) do
-    keys = Map.get(params, :keys, "")
+    if Map.has_key?(params, :keys) do
+      keys = Map.get(params, :keys, "")
 
-    atom_keys =
-      keys
-      |> String.split(",")
-      |> Enum.map(&String.to_atom/1)
+      atom_keys =
+        keys
+        |> String.split(",")
+        |> Enum.map(&String.to_atom/1)
 
-    Map.take(params, atom_keys)
+      Map.take(params, atom_keys)
+    else
+      params
+    end
   end
 end
