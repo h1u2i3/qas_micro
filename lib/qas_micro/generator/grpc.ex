@@ -72,7 +72,13 @@ defmodule QasMicro.Generator.Grpc do
       #{custom_mutation_fields}
       """
     else
-      ""
+      if polymorphic do
+        """
+        defdelegate list_#{Inflex.pluralize(object_name)}(input, stream), to: #{model_module}
+        """
+      else
+        ""
+      end
     end
   end
 
