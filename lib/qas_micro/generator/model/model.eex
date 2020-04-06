@@ -16,7 +16,8 @@ defmodule <%= model_plugin_module %> do
     <%= if join_table do %>
       @primary_key false
     <% else %>
-      @primary_key {:id, :string, autogenerate: {UUID, :uuid4, []}}
+      @primary_key {:id, :string, autogenerate: {<%= uuid_module %>, :unique_id, [:<%= object_name %>]}}
+      @foreign_key_type :string
     <% end %>
 
       schema "<%= table_name %>" do

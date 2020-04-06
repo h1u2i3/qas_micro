@@ -169,14 +169,23 @@ defmodule QasMicro.Config do
         "alipay",
         "qiniu",
         "socket",
-        "global"
+        "global",
+        {"uuid", "UUID"}
       ],
-      fn name ->
-        quote do
-          def unquote(String.to_atom("#{name}_module"))() do
-            Helper.module_atom_from_list(["QasApp", name(), unquote(name)])
+      fn
+        {name, module_name} ->
+          quote do
+            def unquote(String.to_atom("#{name}_module"))() do
+              Helper.module_atom_from_list(["QasApp", name(), unquote(module_name)])
+            end
           end
-        end
+
+        name ->
+          quote do
+            def unquote(String.to_atom("#{name}_module"))() do
+              Helper.module_atom_from_list(["QasApp", name(), unquote(name)])
+            end
+          end
       end
     )
   end

@@ -22,6 +22,7 @@ defmodule QasMicro.Generator.Model do
 
     application_name = config_module.name()
     repo_module = config_module.repo_module()
+    uuid_module = config_module.uuid_module()
     model_module = config_module.model_module(object_name)
     model_plugin_module = config_module.plugin_model_module(object_name)
 
@@ -45,6 +46,7 @@ defmodule QasMicro.Generator.Model do
       soft_delete: soft_delete,
       # modules
       config_module: config_module,
+      uuid_module: uuid_module,
       model_module: model_module,
       model_plugin_module: model_plugin_module,
       repo_module_name: repo_module,
@@ -81,6 +83,8 @@ defmodule QasMicro.Generator.Model do
       model_plugin_module,
       polymorphic
     )
+
+    QasMicro.Generator.Model.UUID.render(config_module)
   end
 
   defp all_fields(object) do
