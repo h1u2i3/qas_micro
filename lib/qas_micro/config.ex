@@ -16,7 +16,7 @@ defmodule QasMicro.Config do
 
   @doc false
   def config do
-    Keyword.merge(default_config(), Application.get_env(:qas, Qas, []))
+    Keyword.merge(default_config(), Application.get_env(:qas_micro, Qas, []))
   end
 
   def options(app, assigns \\ %{}) do

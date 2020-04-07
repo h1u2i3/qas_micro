@@ -25,6 +25,9 @@ defmodule QasMicro.Generator.Database.Index do
 
   defp extract_index_field(field, table_name) do
     Enum.reduce(field, %{}, fn
+      {:type, "index"}, acc ->
+        QMap.put(acc, :type, :index)
+
       {:index, true}, acc ->
         QMap.put(acc, :type, :index)
 

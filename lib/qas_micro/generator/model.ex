@@ -5,7 +5,7 @@ defmodule QasMicro.Generator.Model do
   alias QasMicro.Util.Map, as: QMap
 
   @external_resource Path.join(__DIR__, "model/model.eex")
-  @relation_keys ["has_many", "has_one", "belongs_to"]
+  @relation_keys ["has_many", "has_one", "belongs_to", "index"]
 
   def render(config_module, object) do
     object_name = object.name
@@ -83,8 +83,6 @@ defmodule QasMicro.Generator.Model do
       model_plugin_module,
       polymorphic
     )
-
-    QasMicro.Generator.Model.UUID.render(config_module)
   end
 
   defp all_fields(object) do
