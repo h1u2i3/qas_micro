@@ -6,13 +6,15 @@ defmodule QasMicro.Generator.Database.Index do
 
   @relation_keys ["belongs_to", "has_many", "has_one"]
 
-  def render(object) do
+  def render(object, config_module) do
+    am_authority = config_module.am_authority()
     table_name = Map.get(object, :table_name, Inflex.pluralize(object.name))
 
     object
     |> Map.get(:field, [])
     |> Enum.filter(&(!Enum.member?(@relation_keys, &1.type)))
     |> Enum.filter(&(!Map.get(&1, :virtual, false)))
+    |> Kernel.++(if(am_authority, do: [%{type: "index", name: "am_authority"}], else: []))
     |> Enum.map(&render_single(&1, table_name))
     |> Enum.filter(& &1)
   end

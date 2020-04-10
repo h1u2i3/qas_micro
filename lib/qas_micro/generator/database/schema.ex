@@ -24,7 +24,7 @@ defmodule QasMicro.Generator.Database.Schema do
       timestamp: timestamp,
       primary_key: primary_key,
       field_expressions: QasMicro.Generator.Database.Field.render(object, config_module),
-      index_expressions: QasMicro.Generator.Database.Index.render(object)
+      index_expressions: QasMicro.Generator.Database.Index.render(object, config_module)
     )
     |> config_module.save_file("#{schema_name}.ex", "migration")
   end

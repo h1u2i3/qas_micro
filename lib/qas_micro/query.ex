@@ -30,10 +30,29 @@ defmodule QasMicro.Query do
   end
 
   def filter_with(query, filter, module) do
-    filter
-    |> Map.drop([:__struct__])
-    |> Enum.reduce(query, fn {key, item}, query ->
-      handle_with_filter(module, query, key, item)
+    filter_fields =
+      filter
+      |> Map.drop([:__struct__])
+      |> Enum.map(fn {key, item} ->
+        case Jason.decode(item, keys: :atoms) do
+          {:ok, cast_item} ->
+            cast_item
+            |> List.wrap()
+            |> Enum.map(fn sub -> {key, sub} end)
+
+          {:error, _} ->
+            []
+        end
+      end)
+      |> List.flatten()
+      |> Enum.group_by(fn {_, v} -> Map.get(v, :bool, "and") end)
+
+    %{"and" => and_fields, "or" => or_fields} = filter_fields
+
+    and_fields
+    |> Kernel.++(or_fields)
+    |> Enum.reduce(query, fn {key, value}, query ->
+      handle_with_filter(module, query, key, value)
     end)
   end
 
@@ -60,82 +79,72 @@ defmodule QasMicro.Query do
   end
 
   defp handle_with_filter(module, query, key, item) do
-    case Jason.decode(item, keys: :atoms) do
-      {:ok, item_json} ->
-        item_json
-        |> List.wrap()
-        |> Enum.reduce(query, fn cast_item, query ->
-          if key == :custom do
-            module.filter_with(query, cast_item)
-          else
-            bool = Map.get(cast_item, :bool, "and")
+    if key == :custom do
+      module.filter_with(query, item)
+    else
+      bool = Map.get(item, :bool, "and")
 
-            case cast_item do
-              %{cond: "like", value: value} ->
-                case bool do
-                  "and" ->
-                    from(q in query, where: ilike(field(q, ^key), ^"%#{value}%"))
+      case item do
+        %{cond: "like", value: value} ->
+          case bool do
+            "and" ->
+              from(q in query, where: ilike(field(q, ^key), ^"%#{value}%"))
 
-                  "or" ->
-                    from(q in query, or_where: ilike(field(q, ^key), ^"%#{value}%"))
+            "or" ->
+              from(q in query, or_where: ilike(field(q, ^key), ^"%#{value}%"))
 
-                  _ ->
-                    query
-                end
-
-              %{cond: "eq", value: value} ->
-                case bool do
-                  "and" ->
-                    from(q in query, where: field(q, ^key) == ^value)
-
-                  "or" ->
-                    from(q in query, or_where: field(q, ^key) == ^value)
-
-                  _ ->
-                    query
-                end
-
-              %{cond: "lt", value: value} ->
-                case bool do
-                  "and" ->
-                    from(q in query, where: field(q, ^key) < ^value)
-
-                  "or" ->
-                    from(q in query, or_where: field(q, ^key) < ^value)
-
-                  _ ->
-                    query
-                end
-
-              %{cond: "gt", value: value} ->
-                case bool do
-                  "and" ->
-                    from(q in query, where: field(q, ^key) > ^value)
-
-                  "or" ->
-                    from(q in query, or_where: field(q, ^key) > ^value)
-
-                  _ ->
-                    query
-                end
-
-              %{cond: "in", value: value} ->
-                case bool do
-                  "and" ->
-                    from(q in query, where: field(q, ^key) in ^value)
-
-                  "or" ->
-                    from(q in query, or_where: field(q, ^key) in ^value)
-
-                  _ ->
-                    query
-                end
-            end
+            _ ->
+              query
           end
-        end)
 
-      {:error, _} ->
-        query
+        %{cond: "eq", value: value} ->
+          case bool do
+            "and" ->
+              from(q in query, where: field(q, ^key) == ^value)
+
+            "or" ->
+              from(q in query, or_where: field(q, ^key) == ^value)
+
+            _ ->
+              query
+          end
+
+        %{cond: "lt", value: value} ->
+          case bool do
+            "and" ->
+              from(q in query, where: field(q, ^key) < ^value)
+
+            "or" ->
+              from(q in query, or_where: field(q, ^key) < ^value)
+
+            _ ->
+              query
+          end
+
+        %{cond: "gt", value: value} ->
+          case bool do
+            "and" ->
+              from(q in query, where: field(q, ^key) > ^value)
+
+            "or" ->
+              from(q in query, or_where: field(q, ^key) > ^value)
+
+            _ ->
+              query
+          end
+
+        %{cond: "in", value: value} ->
+          case bool do
+            "and" ->
+              from(q in query, where: field(q, ^key) in ^value)
+
+            "or" ->
+              from(q in query, or_where: field(q, ^key) in ^value)
+
+            _ ->
+              query
+          end
+      end
     end
   end
 
