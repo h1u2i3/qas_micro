@@ -14,6 +14,7 @@ defmodule QasMicro.Generator.Model.Field do
   }
 
   @config_fields %{
+    am_authority: %{name: "am_authority", type: "text"},
     soft_delete: %{name: "deleted_at", type: "integer"}
   }
 
@@ -66,15 +67,13 @@ defmodule QasMicro.Generator.Model.Field do
   end
 
   defp add_config_fields(fields, config_module) do
-    @config_fields
-    |> Enum.reduce(fields, fn {key, value}, acc ->
+    Enum.reduce(@config_fields, fields, fn {key, value}, acc ->
       do_add_config_fields(config_module, acc, key, value)
     end)
   end
 
   defp add_plugin_fields(fields, object) do
-    @plugin_fields
-    |> Enum.reduce(fields, fn {key, value}, acc ->
+    Enum.reduce(@plugin_fields, fields, fn {key, value}, acc ->
       do_add_plugin_fields(object, acc, key, value)
     end)
   end

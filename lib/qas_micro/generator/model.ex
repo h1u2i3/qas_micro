@@ -11,6 +11,7 @@ defmodule QasMicro.Generator.Model do
     object_name = object.name
 
     soft_delete = config_module.soft_delete()
+    am_authority = config_module.am_authority()
 
     table_name = Map.get(object, :table_name, Inflex.pluralize(object_name))
     timestamp = Map.get(object, :timestamp, true)
@@ -34,7 +35,7 @@ defmodule QasMicro.Generator.Model do
     validations = QasMicro.Generator.Model.Validation.render(object)
 
     all_fields = all_fields(object)
-    create_fields = create_fields(object)
+    create_fields = create_fields(object, am_authority)
     update_fields = update_fields(object)
 
     # Add special handling for many_to_many relationships
@@ -93,13 +94,14 @@ defmodule QasMicro.Generator.Model do
     |> Unit.new()
   end
 
-  defp create_fields(object) do
+  defp create_fields(object, am_authority) do
     origin_fields =
       object
       |> QMap.get(:field, [])
       |> Enum.filter(&(!Enum.member?(@relation_keys, &1.type)))
       |> Enum.filter(&Map.get(&1, :create, true))
       |> Enum.map(&Map.get(&1, :name))
+      |> Kernel.++(if(am_authority, do: ["am_authority"], else: []))
 
     if Map.get(object, :password, false) do
       (origin_fields -- ["password_digest"]) ++ ["password"]

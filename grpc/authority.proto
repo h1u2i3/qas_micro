@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.aman.yimei.authority";
+option java_outer_classname = "Authority";
+
+package qas_micro;
+
+message CheckMessage {
+  string model = 1;
+  string id = 2;
+  string user_id = 3;
+}
+
+message CheckResult {
+  bool status = 1;
+}
+
+service Authority {
+  rpc Check(CheckMessage) returns (CheckResult);
+}
