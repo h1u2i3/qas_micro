@@ -17,7 +17,7 @@ defmodule QasMicro.Generator.Model.UUID do
 
     template()
     |> EEx.eval_string(uuid_module: config_module.uuid_module(), model_keys: Unit.new(model_keys))
-    |> config_module.save_file("uuid.ex")
+    |> config_module.save_file("uuid.ex", nil, false)
   end
 
   defp template do
