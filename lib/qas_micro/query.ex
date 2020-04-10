@@ -47,7 +47,8 @@ defmodule QasMicro.Query do
       |> List.flatten()
       |> Enum.group_by(fn {_, v} -> Map.get(v, :bool, "and") end)
 
-    %{"and" => and_fields, "or" => or_fields} = filter_fields
+    and_fields = Map.get(filter_fields, "and", [])
+    or_fields = Map.get(filter_fields, "or", [])
 
     and_fields
     |> Kernel.++(or_fields)
