@@ -3,13 +3,11 @@ defmodule QasMicro.QueryMessage do
   use Protobuf, syntax: :proto3
 
   @type t :: %__MODULE__{
-          action: String.t(),
-          input: String.t()
+          query: String.t()
         }
-  defstruct [:action, :input]
+  defstruct [:query]
 
-  field :action, 1, type: :string
-  field :input, 2, type: :string
+  field :query, 1, type: :string
 end
 
 defmodule QasMicro.CountResult do

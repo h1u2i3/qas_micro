@@ -7,8 +7,7 @@ option java_outer_classname = "Aggregate";
 package qas_micro;
 
 message QueryMessage {
-  string action = 1;
-  string input = 2;
+  string query = 1;
 }
 
 message CountResult {
