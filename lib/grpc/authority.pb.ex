@@ -31,6 +31,7 @@ defmodule QasMicro.Authority.Service do
   use GRPC.Service, name: "qas_micro.Authority"
 
   rpc(:Check, QasMicro.CheckMessage, QasMicro.CheckResult)
+  rpc(:SelfCHeck, QasMicro.CheckMessage, QasMicro.CheckResult)
 end
 
 defmodule QasMicro.Authority.Stub do

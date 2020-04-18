@@ -16,6 +16,10 @@ message CheckResult {
   bool status = 1;
 }
 
+// Two type of authroity check
+// 1. self_check: model belongs_to user
+// 2. am_authority field check
 service Authority {
   rpc Check(CheckMessage) returns (CheckResult);
+  rpc SelfCHeck(CheckMessage) returns (CheckResult);
 }
