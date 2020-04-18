@@ -21,6 +21,13 @@ defmodule QasMicro.Generator.Model do
     unique_number = Map.get(object, :unique_number, false)
     geometry = Map.get(object, :geometry, false)
 
+    am_authority_field =
+      if field = Map.get(object, :am_authority) do
+        String.to_atom(field)
+      else
+        nil
+      end
+
     application_name = config_module.name()
     repo_module = config_module.repo_module()
     uuid_module = config_module.uuid_module()
@@ -66,6 +73,7 @@ defmodule QasMicro.Generator.Model do
       create_fields: create_fields,
       update_fields: update_fields,
       many_to_many_fields: many_to_many_fields,
+      am_authority_field: am_authority_field,
       # field validations
       create_validation: Map.get(validations, :create, []),
       update_validation: Map.get(validations, :update, []),
