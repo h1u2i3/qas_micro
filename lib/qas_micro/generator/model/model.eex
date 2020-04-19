@@ -144,9 +144,9 @@ defmodule <%= model_plugin_module %> do
         result =
           params
           |> Map.take([:filter, :order, :paginate])
-          |> Enum.reduce(__MODULE__, plural_query_reducer(__MODULE__))
-          |> model_ids_filter(ids_map)<%= if soft_delete do %>
+          |> Enum.reduce(__MODULE__, plural_query_reducer(__MODULE__))<%= if soft_delete do %>
           |> with_undeleted()<% end %>
+          |> model_ids_filter(ids_map)
           |> Repo.all
           |> Enum.map(&Map.drop(&1, [:__struct__]))
 
@@ -183,6 +183,7 @@ defmodule <%= model_plugin_module %> do
         %{id: id} = update_input
         {_, input} = Map.split(update_input, [:user, :id])
 
+        params = Helper.to_ex_params(input)
         record = Repo.get(<%= model_module %>, id)
 
         case record do
@@ -190,8 +191,47 @@ defmodule <%= model_plugin_module %> do
             <%= Macro.camelize(application_name) %>.<%= Macro.camelize(object_name) %>Result.new(errors: %{key: "not_found", message: "can not find record"})
 
           _ ->
-            record
-            |> update_changeset(input |> Helper.to_ex_params())
+          <%= if many_to_many_fields do %>
+            m2m_fields = many_to_many_fields()
+            m2m_keys = Map.keys(m2m_fields)
+
+            need_update_m2m_fields =
+              params
+              |> Map.take(m2m_keys)
+              |> Enum.map(fn {k, v} ->
+                model_module = Map.get(m2m_fields, k)
+                model_keys = Helper.to_model_keys(k)
+                model_ids = String.split(v, ",")
+                {model_keys, {model_module, model_ids}}
+              end)
+              |> Enum.into(%{})
+
+            need_update_m2m_keys = Map.keys(need_update_m2m_fields)
+
+            record =
+              if Enum.empty?(need_update_m2m_keys) do
+                record
+              else
+                Enum.reduce(
+                  need_update_m2m_fields,
+                  Repo.preload(record, need_update_m2m_keys),
+                  fn {key, {module, ids}}, acc ->
+                    items =
+                      from(
+                        q in module,
+                        where: q.id in ^ids
+                      )
+                      |> Repo.all
+
+                    Ecto.Changeset.put_assoc(acc, key, items)
+                  end
+                )
+              end
+            <% end %>
+
+            record<%= if many_to_many_fields do %>
+            |> update_changeset(Map.drop(params, m2m_keys))<% else %>
+            |> update_changeset(params)<% end %>
             |> Repo.update
             |> case do
               {:ok, item} ->
@@ -256,46 +296,48 @@ defmodule <%= model_plugin_module %> do
       end
 
       def model_ids_filter(query, ids_map) do
+      <%= if many_to_many_fields do %>
         m2m_fields = many_to_many_fields()
 
-        if Enum.empty?(m2m_fields) do
-          ids_filter(query, ids_map)
-        else
-          {_, cast_ids_map} = Map.split(ids_map, [:__struct__])
-          m2m_fields_keys = Map.keys(m2m_fields)
+        {_, cast_ids_map} = Map.split(ids_map, [:__struct__])
+        m2m_fields_keys = Map.keys(m2m_fields)
 
-          {m2m_map, normal_map} = Map.split(cast_ids_map, m2m_fields_keys)
+        {m2m_map, normal_map} = Map.split(cast_ids_map, m2m_fields_keys)
 
-          query = ids_filter(query, normal_map)
+        query = ids_filter(query, normal_map)
 
-          Enum.reduce(m2m_map, query, fn {key, value}, acc ->
-            if value == nil || Enum.empty?(value) do
-              acc
-            else
-              module = Map.get(m2m_map, key)
+        Enum.reduce(m2m_map, query, fn {key, value}, acc ->
+          if value == nil || Enum.empty?(value) do
+            acc
+          else
+            module = Map.get(m2m_map, key)
 
-              singleton_key =
-                key
-                |> Atom.to_string()
-                |> Inflex.singularize()
-                |> String.to_atom()
+            singleton_key =
+              key
+              |> Atom.to_string()
+              |> Inflex.singularize()
+              |> String.to_atom()
 
-              sub_query =
-                from(
-                  x in module,
-                  where: field(x, ^singleton_key) in ^value
-                )
-
+            sub_query =
               from(
-                q in query,
-                join: qx in subquery(sub_query), on: qx.<%= object_name %>_id == q.id
+                x in module,
+                where: field(x, ^singleton_key) in ^value
               )
-            end
-          end)
-        end
+
+            from(
+              q in query,
+              join: qx in subquery(sub_query), on: qx.<%= object_name %>_id == q.id
+            )
+          end
+        end)
+      <% else %>
+        ids_filter(query, ids_map)
+      <% end %>
       end
 
+    <%= if many_to_many_fields do %>
       defp many_to_many_fields, do: <%= many_to_many_fields %>
+    <% end %>
 
       def order_with(query, _item), do: query
 

@@ -177,4 +177,11 @@ defmodule QasMicro.Util.Helper do
       params
     end
   end
+
+  def to_model_keys(ids) do
+    ids
+    |> Atom.to_string()
+    |> String.replace_suffix("_ids", "")
+    |> String.to_atom()
+  end
 end

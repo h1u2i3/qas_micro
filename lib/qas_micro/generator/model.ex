@@ -98,6 +98,7 @@ defmodule QasMicro.Generator.Model do
     object
     |> QMap.get(:field, [])
     |> Enum.filter(&(!Enum.member?(@relation_keys, &1.type)))
+    |> Enum.filter(&(!Map.get(&1, :virtual, false)))
     |> Enum.map(&String.to_atom(&1.name))
     |> Unit.new()
   end
@@ -142,17 +143,24 @@ defmodule QasMicro.Generator.Model do
     # Because it reversed, so in model, we did not to get the target model
     # We should provide the methods to make other get this model
     # So, must remember
-    object
-    |> Map.get(:field, [])
-    |> Enum.filter(&(Map.get(&1, :type) == "has_many" && Map.get(&1, :many_to_many)))
-    |> Enum.map(fn item ->
-      {
-        # And here we just use the _id to be the key, no need to be other ones
-        String.to_atom("#{Map.get(item, :name)}_ids"),
-        item |> Map.get(:many_to_many) |> config_module.model_module
-      }
-    end)
-    |> Enum.into(%{})
-    |> Unit.new()
+    m2m_fields =
+      object
+      |> Map.get(:field, [])
+      |> Enum.filter(&(Map.get(&1, :type) == "has_many" && Map.get(&1, :many_to_many)))
+
+    if Enum.empty?(m2m_fields) do
+      nil
+    else
+      m2m_fields
+      |> Enum.map(fn item ->
+        {
+          # And here we just use the _id to be the key, no need to be other ones
+          String.to_atom("#{Map.get(item, :name)}_ids"),
+          item |> Map.get(:many_to_many) |> config_module.model_module
+        }
+      end)
+      |> Enum.into(%{})
+      |> Unit.new()
+    end
   end
 end

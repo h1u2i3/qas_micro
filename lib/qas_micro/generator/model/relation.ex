@@ -14,10 +14,7 @@ defmodule QasMicro.Generator.Model.Relation do
       object
       |> Map.get(:field, [])
       |> Enum.filter(&Enum.member?(@relation_keys, &1.type |> String.to_atom()))
-      |> Enum.filter(
-        &(!Map.get(&1, :struct) && !Map.get(&1, :polymorphic, false) &&
-            !Map.get(&1, :many_to_many, false))
-      )
+      |> Enum.filter(&(!Map.get(&1, :struct) && !Map.get(&1, :polymorphic, false)))
       |> Enum.map(&render_single(config_module, &1))
     end
   end
@@ -34,7 +31,13 @@ defmodule QasMicro.Generator.Model.Relation do
   defp arrange_attributes(field, config_module) do
     {type, cast_field} = Map.pop(field, :type)
 
-    cast_type = String.to_atom(type)
+    cast_type =
+      if Map.get(cast_field, :many_to_many) do
+        :many_to_many
+      else
+        String.to_atom(type)
+      end
+
     init_map = QMap.put(%{}, :type, cast_type)
 
     Enum.reduce(cast_field, init_map, fn
@@ -73,6 +76,9 @@ defmodule QasMicro.Generator.Model.Relation do
 
       {:fetch_way, _}, acc ->
         acc
+
+      {:many_to_many, table}, acc ->
+        QMap.put(acc, :join_through, table)
 
       {key, value}, acc ->
         QMap.put(acc, key, QSigil.to_atom(value))
