@@ -41,6 +41,11 @@ defmodule QasMicro.Generator.Grpc do
     join_table = Map.get(object, :join_table, false)
     model_module = config_module.model_module(object_name)
 
+    m2m_fields =
+      object
+      |> Map.get(:field, [])
+      |> Enum.filter(&(Map.get(&1, :type) == "has_many" && Map.get(&1, :many_to_many)))
+
     if !polymorphic && !join_table do
       custom_query_fields =
         object
@@ -62,12 +67,24 @@ defmodule QasMicro.Generator.Grpc do
         end)
         |> Enum.join("")
 
+      m2m_query_fields =
+        m2m_fields
+        |> Enum.map(fn field ->
+          table_name = field.many_to_many
+          query_name = "list_#{table_name}_#{Inflex.pluralize(object_name)}"
+
+          """
+          defdelegate #{query_name}(params, stream), to: #{model_module}
+          """
+        end)
+
       """
       defdelegate list_#{object_name}(common_id, stream), to: #{model_module}
       defdelegate list_#{Inflex.pluralize(object_name)}(params, stream), to: #{model_module}
       defdelegate create_#{object_name}(create_input, stream), to: #{model_module}
       defdelegate update_#{object_name}(update_input, stream), to: #{model_module}
       defdelegate delete_#{object_name}(common_id, stream), to: #{model_module}
+      #{m2m_query_fields}
       #{custom_query_fields}
       #{custom_mutation_fields}
       """

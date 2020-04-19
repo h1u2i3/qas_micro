@@ -74,6 +74,7 @@ defmodule QasMicro.Generator.Model do
       update_fields: update_fields,
       many_to_many_fields: many_to_many_fields,
       am_authority_field: am_authority_field,
+      join_tables: join_tables(object),
       # field validations
       create_validation: Map.get(validations, :create, []),
       update_validation: Map.get(validations, :update, []),
@@ -136,6 +137,13 @@ defmodule QasMicro.Generator.Model do
     end
     |> Enum.map(&String.to_atom/1)
     |> Unit.new()
+  end
+
+  defp join_tables(object) do
+    object
+    |> Map.get(:field, [])
+    |> Enum.filter(&(Map.get(&1, :type) == "has_many" && Map.get(&1, :many_to_many)))
+    |> Enum.map(&{&1.many_to_many, &1.name})
   end
 
   defp many_to_many_fields(config_module, object) do

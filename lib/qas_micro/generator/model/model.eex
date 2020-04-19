@@ -146,7 +146,7 @@ defmodule <%= model_plugin_module %> do
           |> Map.take([:filter, :order, :paginate])
           |> Enum.reduce(__MODULE__, plural_query_reducer(__MODULE__))<%= if soft_delete do %>
           |> with_undeleted()<% end %>
-          |> model_ids_filter(ids_map)
+          |> ids_filter(ids_map)
           |> Repo.all
           |> Enum.map(&Map.drop(&1, [:__struct__]))
 
@@ -154,6 +154,32 @@ defmodule <%= model_plugin_module %> do
           <%= Inflex.pluralize(object_name) %>: result
         )
       end
+
+  <%= if many_to_many_fields do %>
+    <%= for {join_table, relation} <- join_tables do %>
+      def list_<%= join_table %>_<%= Inflex.pluralize(object_name) %>(params, _stream) do
+        {_, ids_map} = Map.split(params, [:filter, :order, :paginate, :user])
+
+        result =
+          params
+          |> Map.take([:filter, :order, :paginate])
+          |> Enum.reduce(__MODULE__, plural_query_reducer(__MODULE__))<%= if soft_delete do %>
+          |> with_undeleted()<% end %>
+          |> model_ids_filter(ids_map, "<%= relation %>_id")
+          |> Repo.all
+          |> Enum.map(fn map ->
+            map
+            |> Map.put("<%= object_name %>", map |> Map.get("<%= object_name %>") |> Map.from_struct())
+            |> Map.new(fn {k, v} -> {String.to_atom(k), v} end)
+            |> <%= Macro.camelize(application_name) %>.<%= Macro.camelize(join_table) %><%= Macro.camelize(object_name) %>.new()
+          end)
+
+        <%= Macro.camelize(application_name) %>.<%= Macro.camelize(join_table) %><%= object_name |> Inflex.pluralize() |> Macro.camelize() %>.new(
+          <%= Inflex.pluralize(object_name) %>: result
+        )
+      end
+    <% end %>
+  <% end %>
 
       def create_<%= object_name %>(create_input, _stream) do
         {_, input} = Map.split(create_input, [:user])
@@ -295,45 +321,44 @@ defmodule <%= model_plugin_module %> do
         end
       end
 
-      def model_ids_filter(query, ids_map) do
-      <%= if many_to_many_fields do %>
+    <%= if many_to_many_fields do %>
+      def model_ids_filter(query, ids_map, relation_id_string) do
         m2m_fields = many_to_many_fields()
-
-        {_, cast_ids_map} = Map.split(ids_map, [:__struct__])
+        cast_ids_map = Map.drop(ids_map, [:__struct__])
         m2m_fields_keys = Map.keys(m2m_fields)
-
         {m2m_map, normal_map} = Map.split(cast_ids_map, m2m_fields_keys)
 
         query = ids_filter(query, normal_map)
 
-        Enum.reduce(m2m_map, query, fn {key, value}, acc ->
-          if value == nil || Enum.empty?(value) do
-            acc
-          else
-            module = Map.get(m2m_map, key)
+        relation_ids =
+          relation_id_string
+          |> Inflex.pluralize()
+          |> String.to_atom()
 
-            singleton_key =
-              key
-              |> Atom.to_string()
-              |> Inflex.singularize()
-              |> String.to_atom()
+        module = Map.get(m2m_fields, relation_ids)
 
-            sub_query =
-              from(
-                x in module,
-                where: field(x, ^singleton_key) in ^value
-              )
+        ids = Map.get(m2m_map, relation_ids)
 
+        if Enum.empty?(ids) do
+          query
+        else
+          singleton_key = relation_id_string
+          singleton_key_atom = String.to_atom(singleton_key)
+
+          sub_query =
             from(
-              q in query,
-              join: qx in subquery(sub_query), on: qx.<%= object_name %>_id == q.id
+              x in module,
+              where: field(x, ^singleton_key_atom) in ^ids
             )
-          end
-        end)
-      <% else %>
-        ids_filter(query, ids_map)
-      <% end %>
+
+          from(
+            q in query,
+            join: qx in subquery(sub_query), on: qx.<%= object_name %>_id == q.id,
+            select: %{^singleton_key => field(qx, ^singleton_key_atom), "<%= object_name %>" => q}
+          )
+        end
       end
+    <% end %>
 
     <%= if many_to_many_fields do %>
       defp many_to_many_fields, do: <%= many_to_many_fields %>
