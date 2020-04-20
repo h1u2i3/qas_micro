@@ -32,7 +32,7 @@ defmodule QasMicro.Generator.Grpc do
       camel_app_name: camel_app_name,
       repo_name: repo_name
     )
-    |> config_module.save_file("transaction.ex")
+    |> config_module.save_file("transaction.ex", nil, false)
   end
 
   defp object_method_template(config_module, object) do
