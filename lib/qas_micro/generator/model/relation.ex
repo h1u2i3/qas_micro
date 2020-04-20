@@ -78,7 +78,7 @@ defmodule QasMicro.Generator.Model.Relation do
         acc
 
       {:many_to_many, table}, acc ->
-        QMap.put(acc, :join_through, table)
+        QMap.put(acc, :join_through, Inflex.pluralize(table))
 
       {key, value}, acc ->
         QMap.put(acc, key, QSigil.to_atom(value))
