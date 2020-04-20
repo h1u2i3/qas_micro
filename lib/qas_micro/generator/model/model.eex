@@ -191,7 +191,7 @@ defmodule <%= model_plugin_module %> do
           {:ok, item} ->
           <%= if am_authority_field do %>
             module = Application.get_env(:qas_micro, :am_authority_module)
-            module.enqueue({:<%= am_authority_field %>, item})
+            module.enqueue({<%= am_authority_field %>, item})
           <% end %>
 
             <%= Macro.camelize(application_name) %>.<%= Macro.camelize(object_name) %>Result.new(
