@@ -135,7 +135,7 @@ defmodule <%= model_plugin_module %> do
           |> Map.drop([:__struct__])
           |> <%= Macro.camelize(application_name) %>.<%= Macro.camelize(object_name) %>.new()
         else
-          if System.get_env("GODSON_TEST") && Enum.empty?(stream) do
+          if System.get_env("GODSON_TEST") && Map.get(stream, :__struct__) != GRPC.Server.Stream do
             %{error: "record not found with id #{id}"}
           else
             raise(GRPC.RPCError, status: :unknown, message: "record not found with id #{id}")
