@@ -20,7 +20,7 @@ defmodule <%= model_plugin_module %> do
       @foreign_key_type :string
     <% end %>
 
-      @derive {Jason.Encoder, only: <%= all_fields %>}
+      @derive {Jason.Encoder, only: <%= all_fields ++ [:id, :created_at, :updated_at] %>}
       schema "<%= table_name %>" do
       <%= for field <- field_schema do %><%= field %>
       <% end %><%= for relation <- relation_schema do %><%= relation %>
