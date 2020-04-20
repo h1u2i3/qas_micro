@@ -22,14 +22,28 @@ defmodule QasMicro.CountResult do
   field :count, 1, type: :int64
 end
 
-defmodule QasMicro.Aggregate.Service do
+defmodule QasMicro.QueryResult do
   @moduledoc false
-  use GRPC.Service, name: "qas_micro.Aggregate"
+  use Protobuf, syntax: :proto3
 
-  rpc :Count, QasMicro.QueryMessage, QasMicro.CountResult
+  @type t :: %__MODULE__{
+          result: String.t()
+        }
+  defstruct [:result]
+
+  field :result, 1, type: :string
 end
 
-defmodule QasMicro.Aggregate.Stub do
+defmodule QasMicro.Advanced.Service do
   @moduledoc false
-  use GRPC.Stub, service: QasMicro.Aggregate.Service
+  use GRPC.Service, name: "qas_micro.Advanced"
+
+  rpc :Count, QasMicro.QueryMessage, QasMicro.CountResult
+  rpc :Query, QasMicro.QueryMessage, QasMicro.QueryResult
+  rpc :Update, QasMicro.QueryMessage, QasMicro.QueryResult
+end
+
+defmodule QasMicro.Advanced.Stub do
+  @moduledoc false
+  use GRPC.Stub, service: QasMicro.Advanced.Service
 end

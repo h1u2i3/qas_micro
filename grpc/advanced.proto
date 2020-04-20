@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.aman.yimei.Advanced";
+option java_outer_classname = "Advanced";
+
+package qas_micro;
+
+message QueryMessage {
+  string query = 1;
+}
+
+message CountResult {
+  int64 count = 1;
+}
+
+message QueryResult{
+  string result = 1;
+}
+
+// Advanced is used for do count and some other query which is not crud
+service Advanced {
+  rpc Count(QueryMessage) returns (CountResult);
+  rpc Query(QueryMessage) returns (QueryResult);
+  rpc Update(QueryMessage) returns (QueryResult);
+}

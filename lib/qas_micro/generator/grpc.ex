@@ -108,7 +108,7 @@ defmodule QasMicro.Generator.Grpc do
       run <%= camel_app_name %>.<%= camel_app_name %>.Server
       run <%= camel_app_name %>.Transaction.Server
       run <%= camel_app_name %>.Authority.Server
-      run <%= camel_app_name %>.Aggregate.Server
+      run <%= camel_app_name %>.Advanced.Server
       run Health.Server
     end
     """
