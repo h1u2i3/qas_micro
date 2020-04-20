@@ -44,6 +44,7 @@ defmodule QasMicro.Generator.Model do
     all_fields = all_fields(object)
     create_fields = create_fields(object, am_authority)
     update_fields = update_fields(object)
+    derive_fields = derive_fields(object)
 
     # Add special handling for many_to_many relationships
     many_to_many_fields = many_to_many_fields(config_module, object)
@@ -74,6 +75,7 @@ defmodule QasMicro.Generator.Model do
       update_fields: update_fields,
       many_to_many_fields: many_to_many_fields,
       am_authority_field: am_authority_field,
+      derive_fields: derive_fields,
       join_tables: join_tables(object),
       # field validations
       create_validation: Map.get(validations, :create, []),
@@ -101,6 +103,16 @@ defmodule QasMicro.Generator.Model do
     |> Enum.filter(&(!Enum.member?(@relation_keys, &1.type)))
     |> Enum.filter(&(!Map.get(&1, :virtual, false)))
     |> Enum.map(&String.to_atom(&1.name))
+    |> Unit.new()
+  end
+
+  defp derive_fields(object) do
+    object
+    |> QMap.get(:field, [])
+    |> Enum.filter(&(!Enum.member?(@relation_keys, &1.type)))
+    |> Enum.filter(&(!Map.get(&1, :virtual, false)))
+    |> Enum.map(&String.to_atom(&1.name))
+    |> Kernel.++([:id, :created_at, :updated_at])
     |> Unit.new()
   end
 
