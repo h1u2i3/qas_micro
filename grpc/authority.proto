@@ -29,5 +29,5 @@ message CheckResult {
 // 2. am_authority field check
 service Authority {
   rpc Check(CheckMessage) returns (CheckResult);
-  rpc SelfCheck(RelationCheckMessage) returns (CheckResult);
+  rpc RelationCheck(RelationCheckMessage) returns (CheckResult);
 }

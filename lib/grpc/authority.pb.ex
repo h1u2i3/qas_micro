@@ -51,7 +51,7 @@ defmodule QasMicro.Authority.Service do
   use GRPC.Service, name: "qas_micro.Authority"
 
   rpc :Check, QasMicro.CheckMessage, QasMicro.CheckResult
-  rpc :SelfCheck, QasMicro.RelationCheckMessage, QasMicro.CheckResult
+  rpc :RelationCheck, QasMicro.RelationCheckMessage, QasMicro.CheckResult
 end
 
 defmodule QasMicro.Authority.Stub do
