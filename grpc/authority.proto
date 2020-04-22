@@ -12,11 +12,12 @@ message CheckMessage {
   string user_id = 3;
 }
 
-message SelfCheckMessage {
-  string model = 1;
-  string id = 2;
-  string relation_id_name = 3;
-  string relation_id_value = 4;
+message RelationCheckMessage {
+  string relation_table = 1;
+  string left_id_name = 2;
+  string left_id_value = 3;
+  string right_id_name = 4;
+  string right_id_value = 5;
 }
 
 message CheckResult {
@@ -24,9 +25,9 @@ message CheckResult {
 }
 
 // Two type of authroity check
-// 1. self_check: model belongs_to user
+// 1. relation_check
 // 2. am_authority field check
 service Authority {
   rpc Check(CheckMessage) returns (CheckResult);
-  rpc SelfCheck(SelfCheckMessage) returns (CheckResult);
+  rpc SelfCheck(RelationCheckMessage) returns (CheckResult);
 }

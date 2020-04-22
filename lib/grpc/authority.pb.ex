@@ -14,22 +14,24 @@ defmodule QasMicro.CheckMessage do
   field :user_id, 3, type: :string
 end
 
-defmodule QasMicro.SelfCheckMessage do
+defmodule QasMicro.RelationCheckMessage do
   @moduledoc false
   use Protobuf, syntax: :proto3
 
   @type t :: %__MODULE__{
-          model: String.t(),
-          id: String.t(),
-          relation_id_name: String.t(),
-          relation_id_value: String.t()
+          relation_table: String.t(),
+          left_id_name: String.t(),
+          left_id_value: String.t(),
+          right_id_name: String.t(),
+          right_id_value: String.t()
         }
-  defstruct [:model, :id, :relation_id_name, :relation_id_value]
+  defstruct [:relation_table, :left_id_name, :left_id_value, :right_id_name, :right_id_value]
 
-  field :model, 1, type: :string
-  field :id, 2, type: :string
-  field :relation_id_name, 3, type: :string
-  field :relation_id_value, 4, type: :string
+  field :relation_table, 1, type: :string
+  field :left_id_name, 2, type: :string
+  field :left_id_value, 3, type: :string
+  field :right_id_name, 4, type: :string
+  field :right_id_value, 5, type: :string
 end
 
 defmodule QasMicro.CheckResult do
@@ -49,7 +51,7 @@ defmodule QasMicro.Authority.Service do
   use GRPC.Service, name: "qas_micro.Authority"
 
   rpc :Check, QasMicro.CheckMessage, QasMicro.CheckResult
-  rpc :SelfCheck, QasMicro.SelfCheckMessage, QasMicro.CheckResult
+  rpc :SelfCheck, QasMicro.RelationCheckMessage, QasMicro.CheckResult
 end
 
 defmodule QasMicro.Authority.Stub do
