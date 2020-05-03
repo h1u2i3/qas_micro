@@ -130,6 +130,7 @@ defmodule QasMicro.Generator.Model do
     else
       origin_fields
     end
+    |> Enum.uniq()
     |> Enum.map(&String.to_atom/1)
     |> Unit.new()
   end
@@ -147,6 +148,7 @@ defmodule QasMicro.Generator.Model do
     else
       origin_fields
     end
+    |> Enum.uniq()
     |> Enum.map(&String.to_atom/1)
     |> Unit.new()
   end
