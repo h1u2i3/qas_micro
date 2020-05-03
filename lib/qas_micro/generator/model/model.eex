@@ -30,10 +30,6 @@ defmodule <%= model_plugin_module %> do
       <% end %>
       end
 
-    <%= if password do %>
-      @password_fields [:old_password, :password]
-    <% end %>
-
       def create_changeset(struct, params \\ %{}) do
         struct
         |> Ecto.Changeset.cast(params, create_fields())
@@ -97,7 +93,7 @@ defmodule <%= model_plugin_module %> do
       def password_changeset(struct, params \\ %{}) do
         struct
         |> Ecto.Changeset.change()
-        |> Ecto.Changeset.cast(params, @password_fields)
+        |> Ecto.Changeset.cast(params, [:password])
         |> check_old_password(Map.get(params, :old_password))
         |> generate_password_digest
       end
