@@ -31,7 +31,7 @@ defmodule <%= model_plugin_module %> do
       end
 
     <%= if password do %>
-      @password_fields [:password, :password_confirmation]
+      @password_fields [:old_password, :password]
     <% end %>
 
       def create_changeset(struct, params \\ %{}) do
@@ -98,7 +98,6 @@ defmodule <%= model_plugin_module %> do
         struct
         |> Ecto.Changeset.change()
         |> Ecto.Changeset.cast(params, @password_fields)
-        |> Ecto.Changeset.validate_confirmation(:password, [])
         |> check_old_password(Map.get(params, :old_password))
         |> generate_password_digest
       end
