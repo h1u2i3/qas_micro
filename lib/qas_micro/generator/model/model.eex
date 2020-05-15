@@ -244,7 +244,7 @@ defmodule <%= model_plugin_module %> do
               |> Enum.into(%{})
 
             record =
-              if Enum.empty?(need_update_m2m_keys) do
+              if Enum.empty?(need_update_m2m_fields) do
                 record
               else
                 Enum.map(need_update_m2m_fields, fn {m, relation_id, add, remove} ->
