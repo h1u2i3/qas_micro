@@ -225,33 +225,44 @@ defmodule <%= model_plugin_module %> do
               params
               |> Map.take(m2m_keys)
               |> Enum.map(fn {k, v} ->
-                model_module = Map.get(m2m_fields, k)
-                model_keys = Helper.to_model_keys(k)
-                model_ids = String.split(v, ",")
-                {model_keys, {model_module, model_ids}}
+                {target_model_module, join_module} = Map.get(m2m_fields, k)
+
+                relation_id =
+                  target_model_module
+                  |> Macro.underscore()
+                  |> Kernel.<>("_id")
+                  |> String.to_atom()
+
+                case Jason.decode(v) do
+                  {:ok, result} ->
+                    {join_module, relation_id, Map.get(result, :add, []), Map.get(result, :add, [])}
+
+                  {:error, _} ->
+                    {join_module, relation_id, [], []}
+                end
               end)
               |> Enum.into(%{})
-
-            need_update_m2m_keys = Map.keys(need_update_m2m_fields)
 
             record =
               if Enum.empty?(need_update_m2m_keys) do
                 record
               else
-                Enum.reduce(
-                  need_update_m2m_fields,
-                  Repo.preload(record, need_update_m2m_keys),
-                  fn {key, {module, ids}}, acc ->
-                    items =
-                      from(
-                        q in module,
-                        where: q.id in ^ids
-                      )
-                      |> Repo.all
+                Enum.map(need_update_m2m_fields, fn {m, relation_id, add, remove} ->
+                  Repo.delete_all(
+                    from(
+                      j in m,
+                      where: field(j, ^relation_id) in ^remove and j.<%= object_name %>_id == ^record.id
+                    )
+                  )
 
-                    Ecto.Changeset.put_assoc(acc, key, items)
-                  end
-                )
+                  Repo.insert_all(
+                    m,
+                    Enum.map(add, fn r_id ->
+                      [{relation_id, r_id}, {String.to_atom("<%= object_name %>_id"), record.id}]
+                      |> Enum.into(%{})
+                    end)
+                  )
+                end)
               end
             <% end %>
 

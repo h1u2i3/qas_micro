@@ -160,7 +160,7 @@ defmodule QasMicro.Generator.Model do
     |> Enum.map(
       &{
         Map.get(&1, :many_to_many),
-        Map.get(&1, :struct) || Map.get(&1, :name)
+        Map.get(&1, :name)
       }
     )
   end
@@ -184,8 +184,11 @@ defmodule QasMicro.Generator.Model do
 
         {
           # And here we just use the _id to be the key, no need to be other ones
-          String.to_atom("#{target_model_name}_ids"),
-          item |> Map.get(:many_to_many) |> config_module.model_module
+          String.to_atom("#{Map.get(item, :name)}_ids"),
+          {
+            config_module.model_module(target_model_name),
+            item |> Map.get(:many_to_many) |> config_module.model_module
+          }
         }
       end)
       |> Enum.into(%{})

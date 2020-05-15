@@ -182,6 +182,7 @@ defmodule QasMicro.Util.Helper do
     ids
     |> Atom.to_string()
     |> String.replace_suffix("_ids", "")
+    |> Inflex.pluralize()
     |> String.to_atom()
   end
 end
