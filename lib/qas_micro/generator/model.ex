@@ -157,7 +157,12 @@ defmodule QasMicro.Generator.Model do
     object
     |> Map.get(:field, [])
     |> Enum.filter(&(Map.get(&1, :type) == "has_many" && Map.get(&1, :many_to_many)))
-    |> Enum.map(&{&1.many_to_many, &1.name})
+    |> Enum.map(
+      &{
+        Map.get(&1, :many_to_many),
+        Map.get(&1, :struct) || Map.get(&1, :name)
+      }
+    )
   end
 
   defp many_to_many_fields(config_module, object) do
@@ -175,9 +180,11 @@ defmodule QasMicro.Generator.Model do
     else
       m2m_fields
       |> Enum.map(fn item ->
+        target_model_name = Map.get(item, :struct) || Map.get(item, :name)
+
         {
           # And here we just use the _id to be the key, no need to be other ones
-          String.to_atom("#{Map.get(item, :name)}_ids"),
+          String.to_atom("#{target_model_name}_ids"),
           item |> Map.get(:many_to_many) |> config_module.model_module
         }
       end)

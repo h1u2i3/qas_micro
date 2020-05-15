@@ -1,5 +1,8 @@
 {
   "editor.formatOnSave": true,
+  "[eex]": {
+    "editor.formatOnSave": false
+  },
   "cSpell.words": [
     "Inflex",
     "alipay",
