@@ -92,11 +92,14 @@ defmodule QasMicro.Generator.Database.Field do
       type when type in [:geometry] ->
         QMap.put(acc, :type, Geo.PostGIS.Geometry)
 
-      type when type in [:text, :file, :files] ->
+      type when type in [:text] ->
         acc |> QMap.put(:type, :string) |> QMap.put(:"meta.type", :text)
 
-      type when type in [:json, :jsons] ->
-        acc |> QMap.put(:type, :jsonb)
+      type when type in [:file, :json] ->
+        QMap.put(acc, :type, :map)
+
+      type when type in [:jsons, :files] ->
+        QMap.put(acc, :type, {:array, :map})
 
       _ ->
         QMap.put(acc, :type, type)

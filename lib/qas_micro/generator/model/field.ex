@@ -120,9 +120,9 @@ defmodule QasMicro.Generator.Model.Field do
     case type do
       :int64 -> QMap.put(acc, :type, :integer)
       :geometry -> QMap.put(acc, :type, Geo.PostGIS.Geometry)
-      type when type in [:text, :file, :files] -> QMap.put(acc, :type, :string)
-      type when type in [:json] -> QMap.put(acc, :type, :map)
-      type when type in [:jsons] -> QMap.put(acc, :type, {:array, :map})
+      type when type in [:text] -> QMap.put(acc, :type, :string)
+      type when type in [:file, :json] -> QMap.put(acc, :type, :map)
+      type when type in [:jsons, :files] -> QMap.put(acc, :type, {:array, :map})
       _ -> QMap.put(acc, :type, type)
     end
   end
