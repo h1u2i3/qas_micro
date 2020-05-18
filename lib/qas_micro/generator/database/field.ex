@@ -96,7 +96,7 @@ defmodule QasMicro.Generator.Database.Field do
         acc |> QMap.put(:type, :string) |> QMap.put(:"meta.type", :text)
 
       type when type in [:json, :jsons] ->
-        QMap.put(acc, :type, :json)
+        acc |> QMap.put(:type, :jsonb)
 
       _ ->
         QMap.put(acc, :type, type)
