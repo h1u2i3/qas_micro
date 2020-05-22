@@ -346,7 +346,7 @@ defmodule <%= model_plugin_module %> do
           |> Inflex.pluralize()
           |> String.to_atom()
 
-        module = Map.get(m2m_fields, relation_ids)
+        {_, module} = Map.get(m2m_fields, relation_ids)
 
         ids = Map.get(m2m_map, relation_ids)
 
