@@ -4,7 +4,9 @@ defmodule QasMicro.Decimal do
   alias Decimal, as: D
 
   def type, do: :decimal
-  def cast(string) when is_binary(string), do: {:ok, string}
+  def cast(string) when is_binary(string), do: {:ok, D.new(string)}
+
+  def cast(%Decimal{} = decimal), do: {:ok, decimal}
 
   def cast(_), do: :error
 
