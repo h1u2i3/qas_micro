@@ -25,7 +25,7 @@ defmodule QasMicro.MixProject do
     [
       {:jason, "~> 1.1"},
       {:inflex, "~> 2.0"},
-      {:yacto, github: "gumi/yacto"},
+      {:yacto, github: "aman-io/yacto"},
       {:plug_cowboy, "~> 2.0"},
       {:geo_postgis, "~> 3.1"},
       {:grpc, github: "elixir-grpc/grpc"},
@@ -34,7 +34,7 @@ defmodule QasMicro.MixProject do
       # deps fix
       {:cowboy, "~> 2.7.0"},
       {:gun, "~> 2.0.0", hex: :grpc_gun},
-      {:cowlib, "~> 2.8.0", hex: :grpc_cowlib, override: true}
+      {:cowlib, "~> 2.9.0", override: true}
     ]
   end
 
