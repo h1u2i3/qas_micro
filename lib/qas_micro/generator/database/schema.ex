@@ -32,7 +32,7 @@ defmodule QasMicro.Generator.Database.Schema do
   defp schema_template do
     ~S"""
     defmodule <%= schema_module %> do
-      use Yacto.Schema, dbname: String.to_atom("<%= database_name %>_#{System.get_env("MIX_ENV") || Mix.env()}")
+      use Yacto.Schema, dbname: :"<%= database_name %>"
 
     <%= if primary_key do %>
       @primary_key {:id, :string, autogenerate: {UUID, :uuid4, []}}
