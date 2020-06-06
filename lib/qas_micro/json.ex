@@ -1,5 +1,5 @@
 defmodule QasMicro.Json do
-  @behaviour Ecto.Type
+  use Ecto.Type
 
   def type, do: :map
 
@@ -20,7 +20,7 @@ defmodule QasMicro.Json do
 end
 
 defmodule QasMicro.JsonArray do
-  @behaviour Ecto.Type
+  use Ecto.Type
 
   def type, do: {:array, :map}
 

@@ -1,5 +1,5 @@
 defmodule QasMicro.Decimal do
-  @behaviour Ecto.Type
+  use Ecto.Type
 
   alias Decimal, as: D
 
