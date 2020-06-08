@@ -23,4 +23,5 @@ service Advanced {
   rpc Count(QueryMessage) returns (CountResult);
   rpc Query(QueryMessage) returns (QueryResult);
   rpc Update(QueryMessage) returns (QueryResult);
+  rpc Insert(QueryMessage) returns (QueryResult);
 }

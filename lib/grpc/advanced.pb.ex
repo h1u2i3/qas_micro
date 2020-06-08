@@ -7,7 +7,7 @@ defmodule QasMicro.QueryMessage do
         }
   defstruct [:query]
 
-  field :query, 1, type: :string
+  field(:query, 1, type: :string)
 end
 
 defmodule QasMicro.CountResult do
@@ -19,7 +19,7 @@ defmodule QasMicro.CountResult do
         }
   defstruct [:count]
 
-  field :count, 1, type: :int64
+  field(:count, 1, type: :int64)
 end
 
 defmodule QasMicro.QueryResult do
@@ -31,16 +31,17 @@ defmodule QasMicro.QueryResult do
         }
   defstruct [:result]
 
-  field :result, 1, type: :string
+  field(:result, 1, type: :string)
 end
 
 defmodule QasMicro.Advanced.Service do
   @moduledoc false
   use GRPC.Service, name: "qas_micro.Advanced"
 
-  rpc :Count, QasMicro.QueryMessage, QasMicro.CountResult
-  rpc :Query, QasMicro.QueryMessage, QasMicro.QueryResult
-  rpc :Update, QasMicro.QueryMessage, QasMicro.QueryResult
+  rpc(:Count, QasMicro.QueryMessage, QasMicro.CountResult)
+  rpc(:Query, QasMicro.QueryMessage, QasMicro.QueryResult)
+  rpc(:Update, QasMicro.QueryMessage, QasMicro.QueryResult)
+  rpc(:Insert, QasMicro.QueryMessage, QasMicro.QueryResult)
 end
 
 defmodule QasMicro.Advanced.Stub do
