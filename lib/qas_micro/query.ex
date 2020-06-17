@@ -87,12 +87,19 @@ defmodule QasMicro.Query do
 
       case item do
         %{cond: "like", value: value} ->
+          cast_value =
+            if String.contains?(value, "%") do
+              value
+            else
+              "%#{value}%"
+            end
+
           case bool do
             "and" ->
-              from(q in query, where: ilike(field(q, ^key), ^"%#{value}%"))
+              from(q in query, where: ilike(field(q, ^key), ^cast_value))
 
             "or" ->
-              from(q in query, or_where: ilike(field(q, ^key), ^"%#{value}%"))
+              from(q in query, or_where: ilike(field(q, ^key), ^cast_value))
 
             _ ->
               query
