@@ -120,10 +120,11 @@ defmodule <%= model_plugin_module %> do
       def list_<%= object_name %>(common_id, stream) do
         %{id: id} = common_id
 
-        result =
+        result = <%= cache_module %>.fetch_or_store(id, fn ->
           from(q in __MODULE__, where: q.id == ^id)<%= if soft_delete do %>
           |> with_undeleted()<% end %>
           |> Repo.one()
+        )
 
         if result do
           result
@@ -141,14 +142,24 @@ defmodule <%= model_plugin_module %> do
       def list_<%= Inflex.pluralize(object_name) %>(params, _stream) do
         {_, ids_map} = Map.split(params, [:filter, :order, :paginate, :user])
 
-        result =
+        query =
           params
           |> Map.take([:filter, :order, :paginate])
           |> Enum.reduce(__MODULE__, plural_query_reducer(__MODULE__))<%= if soft_delete do %>
           |> with_undeleted()<% end %>
           |> ids_filter(ids_map)
-          |> Repo.all
-          |> Enum.map(&Map.drop(&1, [:__struct__]))
+
+        key =
+          :md5
+          |> :crypto.hash(Base.encode64(Macro.to_string(query)))
+          |> Base.encode16(case: :lower)
+
+        result =
+          <%= cache_module %>.fetch_or_store(key, fn ->
+            query
+            |> Repo.all
+            |> Enum.map(&Map.drop(&1, [:__struct__]))
+          end)
 
         <%= Macro.camelize(application_name) %>.<%= object_name |> Inflex.pluralize() |> Macro.camelize() %>.new(
           <%= Inflex.pluralize(object_name) %>: result
@@ -160,18 +171,28 @@ defmodule <%= model_plugin_module %> do
       def list_<%= join_table %>_<%= Inflex.pluralize(object_name) %>(params, _stream) do
         {_, ids_map} = Map.split(params, [:filter, :order, :paginate, :user])
 
-        result =
+        query =
           params
           |> Map.take([:filter, :order, :paginate])
           |> Enum.reduce(__MODULE__, plural_query_reducer(__MODULE__))<%= if soft_delete do %>
           |> with_undeleted()<% end %>
           |> model_ids_filter(ids_map, "<%= relation %>_id")
-          |> Repo.all
-          |> Enum.map(fn map ->
-            map
-            |> Map.put("<%= object_name %>", map |> Map.get("<%= object_name %>") |> Map.from_struct())
-            |> Map.new(fn {k, v} -> {String.to_atom(k), v} end)
-            |> <%= Macro.camelize(application_name) %>.<%= Macro.camelize(join_table) %><%= Macro.camelize(object_name) %>.new()
+
+        key =
+          :md5
+          |> :crypto.hash(Base.encode64(Macro.to_string(query)))
+          |> Base.encode16(case: :lower)
+
+        result =
+          <%= cache_module %>.fetch_or_store(key, fn ->
+            query
+            |> Repo.all
+            |> Enum.map(fn map ->
+              map
+              |> Map.put("<%= object_name %>", map |> Map.get("<%= object_name %>") |> Map.from_struct())
+              |> Map.new(fn {k, v} -> {String.to_atom(k), v} end)
+              |> <%= Macro.camelize(application_name) %>.<%= Macro.camelize(join_table) %><%= Macro.camelize(object_name) %>.new()
+            end))
           end)
 
         <%= Macro.camelize(application_name) %>.<%= Macro.camelize(join_table) %><%= object_name |> Inflex.pluralize() |> Macro.camelize() %>.new(

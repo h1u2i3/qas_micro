@@ -34,6 +34,8 @@ defmodule QasMicro.Generator.Model do
     model_module = config_module.model_module(object_name)
     model_plugin_module = config_module.plugin_model_module(object_name)
 
+    cache_module = Application.get_env(:qas_micro, :query_cache)
+
     field_schema = QasMicro.Generator.Model.Field.render(config_module, object)
     # TODO
     # No need with the relationship between models
@@ -59,6 +61,8 @@ defmodule QasMicro.Generator.Model do
       model_module: model_module,
       model_plugin_module: model_plugin_module,
       repo_module_name: repo_module,
+      # query cache
+      cache_module: cache_module,
       # names
       application_name: application_name,
       object_name: object_name,
