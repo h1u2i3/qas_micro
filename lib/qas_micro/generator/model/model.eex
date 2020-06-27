@@ -124,7 +124,7 @@ defmodule <%= model_plugin_module %> do
           from(q in __MODULE__, where: q.id == ^id)<%= if soft_delete do %>
           |> with_undeleted()<% end %>
           |> Repo.one()
-        )
+        end)
 
         if result do
           result
@@ -192,7 +192,7 @@ defmodule <%= model_plugin_module %> do
               |> Map.put("<%= object_name %>", map |> Map.get("<%= object_name %>") |> Map.from_struct())
               |> Map.new(fn {k, v} -> {String.to_atom(k), v} end)
               |> <%= Macro.camelize(application_name) %>.<%= Macro.camelize(join_table) %><%= Macro.camelize(object_name) %>.new()
-            end))
+            end)
           end)
 
         <%= Macro.camelize(application_name) %>.<%= Macro.camelize(join_table) %><%= object_name |> Inflex.pluralize() |> Macro.camelize() %>.new(
