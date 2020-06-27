@@ -8,6 +8,7 @@ package qas_micro;
 
 message QueryMessage {
   string query = 1;
+  string args = 2;
 }
 
 message CountResult {
