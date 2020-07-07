@@ -25,4 +25,5 @@ service Advanced {
   rpc Query(QueryMessage) returns (QueryResult);
   rpc Update(QueryMessage) returns (QueryResult);
   rpc Insert(QueryMessage) returns (QueryResult);
+  rpc Delete(QueryMessage) returns (QueryResult);
 }
