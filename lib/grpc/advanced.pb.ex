@@ -45,6 +45,7 @@ defmodule QasMicro.Advanced.Service do
   rpc(:Update, QasMicro.QueryMessage, QasMicro.QueryResult)
   rpc(:Insert, QasMicro.QueryMessage, QasMicro.QueryResult)
   rpc(:Delete, QasMicro.QueryMessage, QasMicro.QueryResult)
+  rpc(:Sql, QasMicro.QueryMessage, QasMicro.QueryResult)
 end
 
 defmodule QasMicro.Advanced.Stub do

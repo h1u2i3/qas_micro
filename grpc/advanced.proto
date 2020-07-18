@@ -15,7 +15,7 @@ message CountResult {
   int64 count = 1;
 }
 
-message QueryResult{
+message QueryResult {
   string result = 1;
 }
 
@@ -26,4 +26,5 @@ service Advanced {
   rpc Update(QueryMessage) returns (QueryResult);
   rpc Insert(QueryMessage) returns (QueryResult);
   rpc Delete(QueryMessage) returns (QueryResult);
+  rpc Sql(QueryMessage) returns (QueryResult);
 }
