@@ -129,6 +129,18 @@ defmodule QasMicro.Query do
               query
           end
 
+        %{cond: "lte", value: value} ->
+          case bool do
+            "and" ->
+              from(q in query, where: field(q, ^key) <= ^value)
+
+            "or" ->
+              from(q in query, or_where: field(q, ^key) <= ^value)
+
+            _ ->
+              query
+          end
+
         %{cond: "gt", value: value} ->
           case bool do
             "and" ->
@@ -136,6 +148,18 @@ defmodule QasMicro.Query do
 
             "or" ->
               from(q in query, or_where: field(q, ^key) > ^value)
+
+            _ ->
+              query
+          end
+
+        %{cond: "gte", value: value} ->
+          case bool do
+            "and" ->
+              from(q in query, where: field(q, ^key) >= ^value)
+
+            "or" ->
+              from(q in query, or_where: field(q, ^key) >= ^value)
 
             _ ->
               query
