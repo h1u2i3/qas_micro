@@ -108,10 +108,18 @@ defmodule QasMicro.Query do
         %{cond: "eq", value: value} ->
           case bool do
             "and" ->
-              from(q in query, where: field(q, ^key) == ^value)
+              if value == nil do
+                from(q in query, where: is_nil(field(q, ^key)))
+              else
+                from(q in query, where: field(q, ^key) == ^value)
+              end
 
             "or" ->
-              from(q in query, or_where: field(q, ^key) == ^value)
+              if value == nil do
+                from(q in query, or_where: is_nil(field(q, ^key)))
+              else
+                from(q in query, or_where: field(q, ^key) == ^value)
+              end
 
             _ ->
               query
