@@ -125,6 +125,26 @@ defmodule QasMicro.Query do
               query
           end
 
+        %{cond: "not_eq", value: value} ->
+          case bool do
+            "and" ->
+              if value == nil do
+                from(q in query, where: not is_nil(field(q, ^key)))
+              else
+                from(q in query, where: not field(q, ^key) == ^value)
+              end
+
+            "or" ->
+              if value == nil do
+                from(q in query, or_where: not is_nil(field(q, ^key)))
+              else
+                from(q in query, or_where: not field(q, ^key) == ^value)
+              end
+
+            _ ->
+              query
+          end
+
         %{cond: "lt", value: value} ->
           case bool do
             "and" ->
@@ -180,6 +200,18 @@ defmodule QasMicro.Query do
 
             "or" ->
               from(q in query, or_where: field(q, ^key) in ^value)
+
+            _ ->
+              query
+          end
+
+        %{cond: "not_in", value: value} ->
+          case bool do
+            "and" ->
+              from(q in query, where: not (field(q, ^key) in ^value))
+
+            "or" ->
+              from(q in query, or_where: not (field(q, ^key) in ^value))
 
             _ ->
               query
