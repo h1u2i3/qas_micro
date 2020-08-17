@@ -256,7 +256,7 @@ defmodule <%= model_plugin_module %> do
 
                 case Jason.decode(v) do
                   {:ok, result} ->
-                    {join_module, relation_id, Map.get(result, :add, []), Map.get(result, :add, [])}
+                    {join_module, relation_id, Map.get(result, :add, []), Map.get(result, :remove, [])}
 
                   {:error, _} ->
                     {join_module, relation_id, [], []}
@@ -264,10 +264,7 @@ defmodule <%= model_plugin_module %> do
               end)
               |> Enum.into(%{})
 
-            record =
-              if Enum.empty?(need_update_m2m_fields) do
-                record
-              else
+              if !Enum.empty?(need_update_m2m_fields) do
                 Enum.map(need_update_m2m_fields, fn {m, relation_id, add, remove} ->
                   Repo.delete_all(
                     from(
