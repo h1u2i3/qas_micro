@@ -250,11 +250,13 @@ defmodule <%= model_plugin_module %> do
 
                 relation_id =
                   target_model_module
+                  |> Module.split()
+                  |> List.last()
                   |> Macro.underscore()
                   |> Kernel.<>("_id")
                   |> String.to_atom()
 
-                case Jason.decode(v) do
+                case Jason.decode(v, keys: :atoms) do
                   {:ok, result} ->
                     {join_module, relation_id, Map.get(result, :add, []), Map.get(result, :remove, [])}
 
@@ -262,7 +264,6 @@ defmodule <%= model_plugin_module %> do
                     {join_module, relation_id, [], []}
                 end
               end)
-              |> Enum.into(%{})
 
               if !Enum.empty?(need_update_m2m_fields) do
                 Enum.map(need_update_m2m_fields, fn {m, relation_id, add, remove} ->
