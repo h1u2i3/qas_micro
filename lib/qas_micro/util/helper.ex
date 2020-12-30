@@ -185,4 +185,14 @@ defmodule QasMicro.Util.Helper do
     |> Inflex.pluralize()
     |> String.to_atom()
   end
+
+  def file_not_changed(path, string) do
+    md5_string(File.read!(path)) === md5_string(string)
+  end
+
+  defp md5_string(string) do
+    :md5
+    |> :crypto.hash(string)
+    |> Base.encode16(case: :lower)
+  end
 end
