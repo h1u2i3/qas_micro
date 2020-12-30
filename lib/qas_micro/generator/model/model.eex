@@ -140,13 +140,13 @@ defmodule <%= model_plugin_module %> do
       end
 
       def list_<%= Inflex.pluralize(object_name) %>(params, _stream) do
-        {_, ids_map} = Map.split(params, [:filter, :order, :paginate, :user])
+        {_, ids_map} = Map.split(params, [:filter, :order, :paginate, :user, :relation])
 
         query =
           params
           |> Map.take([:filter, :order, :paginate])
           |> Enum.reduce(__MODULE__, plural_query_reducer(__MODULE__))<%= if soft_delete do %>
-          |> with_undeleted()<% end %>
+          |> with_undeleted(Map.get(params, :relation, false))<% end %>
           |> ids_filter(ids_map)
 
         key =

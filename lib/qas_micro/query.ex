@@ -238,10 +238,14 @@ defmodule QasMicro.Query do
     end)
   end
 
-  def with_undeleted(query) do
-    from(
-      q in query,
-      where: is_nil(q.deleted_at)
-    )
+  def with_undeleted(query, relation) do
+    if !relation do
+      from(
+        q in query,
+        where: is_nil(q.deleted_at)
+      )
+    else
+      query
+    end
   end
 end
