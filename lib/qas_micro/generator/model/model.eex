@@ -122,7 +122,7 @@ defmodule <%= model_plugin_module %> do
 
         result = <%= cache_module %>.fetch_or_store(id, fn ->
           from(q in __MODULE__, where: q.id == ^id)<%= if soft_delete do %>
-          |> with_undeleted()<% end %>
+          |> with_undeleted(false)<% end %>
           |> Repo.one()
         end)
 
@@ -169,13 +169,13 @@ defmodule <%= model_plugin_module %> do
   <%= if many_to_many_fields do %>
     <%= for {join_table, relation} <- join_tables do %>
       def list_<%= join_table %>_<%= Inflex.pluralize(object_name) %>(params, _stream) do
-        {_, ids_map} = Map.split(params, [:filter, :order, :paginate, :user])
+        {_, ids_map} = Map.split(params, [:filter, :order, :paginate, :user, :relation])
 
         query =
           params
           |> Map.take([:filter, :order, :paginate])
           |> Enum.reduce(__MODULE__, plural_query_reducer(__MODULE__))<%= if soft_delete do %>
-          |> with_undeleted()<% end %>
+          |> with_undeleted(Map.get(params, :relation, false))<% end %>
           |> model_ids_filter(ids_map, "<%= relation %>_id")
 
         key =
