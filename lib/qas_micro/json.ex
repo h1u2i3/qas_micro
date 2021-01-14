@@ -15,7 +15,7 @@ defmodule QasMicro.Json do
   def cast(_), do: :error
 
   def load(data) when is_map(data), do: Jason.encode(data)
-  def load(data) when is_binary(data), do: data
+  def load(data) when is_binary(data), do: {:ok, data}
 
   def dump(string) when is_binary(string), do: Jason.decode(string, keys: :atoms)
 end
