@@ -103,14 +103,12 @@ defmodule QasMicro.Config do
               path = Path.join([folder, filename])
               cast_string = Code.format_string!(string)
 
-              if replace_origin do
-                if !Helper.file_not_changed(path, cast_string) do
+              if !File.exists?(path) do
+                File.write!(path, cast_string)
+              else
+                if replace_origin && !Helper.file_not_changed(path, cast_string) do
                   File.write!(path, cast_string)
                   # File.write!(path, string)
-                end
-              else
-                if !File.exists?(path) do
-                  File.write!(path, cast_string)
                 end
               end
 
