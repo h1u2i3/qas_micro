@@ -143,7 +143,9 @@ defmodule <%= model_plugin_module %> do
         {_, ids_map} = Map.split(params, [:filter, :order, :paginate, :user, :relation])
 
         ids_not_empty =
-          Enum.any?(ids_map, fn {_key, value} ->
+          ids_map
+          |> Map.delete(:__struct__)
+          |> Enum.any?(fn {_key, value} ->
             length(value) > 0
           end)
 
