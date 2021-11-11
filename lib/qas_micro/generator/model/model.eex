@@ -152,7 +152,7 @@ defmodule <%= model_plugin_module %> do
         relation = Map.get(params, :relation, false)
 
         result =
-          if realtion && !ids_not_empty do
+          if relation && !ids_not_empty do
             []
           else
             query =
