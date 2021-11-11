@@ -142,24 +142,34 @@ defmodule <%= model_plugin_module %> do
       def list_<%= Inflex.pluralize(object_name) %>(params, _stream) do
         {_, ids_map} = Map.split(params, [:filter, :order, :paginate, :user, :relation])
 
-        query =
-          params
-          |> Map.take([:filter, :order, :paginate])
-          |> Enum.reduce(__MODULE__, plural_query_reducer(__MODULE__))<%= if soft_delete do %>
-          |> with_undeleted(Map.get(params, :relation, false))<% end %>
-          |> ids_filter(ids_map)
-
-        key =
-          :md5
-          |> :crypto.hash(Base.encode64(Macro.to_string(query)))
-          |> Base.encode16(case: :lower)
+        ids_not_empty =
+          Enum.any?(fn {_key, value} ->
+            length(value) > 0
+          end)
 
         result =
-          <%= cache_module %>.fetch_or_store(key, fn ->
-            query
-            |> Repo.all
-            |> Enum.map(&Map.drop(&1, [:__struct__]))
-          end)
+          if ids_not_empty do
+            query =
+              params
+              |> Map.take([:filter, :order, :paginate])
+              |> Enum.reduce(__MODULE__, plural_query_reducer(__MODULE__))<%= if soft_delete do %>
+              |> with_undeleted(Map.get(params, :relation, false))<% end %>
+              |> ids_filter(ids_map)
+
+            key =
+              :md5
+              |> :crypto.hash(Base.encode64(Macro.to_string(query)))
+              |> Base.encode16(case: :lower)
+
+            <%= cache_module %>.fetch_or_store(key, fn ->
+              query
+              |> Repo.all
+              |> Enum.map(&Map.drop(&1, [:__struct__]))
+            end)
+          else
+            []
+          end
+
 
         <%= Macro.camelize(application_name) %>.<%= object_name |> Inflex.pluralize() |> Macro.camelize() %>.new(
           <%= Inflex.pluralize(object_name) %>: result
