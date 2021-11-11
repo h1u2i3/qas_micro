@@ -149,13 +149,17 @@ defmodule <%= model_plugin_module %> do
             length(value) > 0
           end)
 
+        relation = Map.get(params, :relation, false)
+
         result =
-          if ids_not_empty do
+          if realtion && !ids_not_empty do
+            []
+          else
             query =
               params
               |> Map.take([:filter, :order, :paginate])
               |> Enum.reduce(__MODULE__, plural_query_reducer(__MODULE__))<%= if soft_delete do %>
-              |> with_undeleted(Map.get(params, :relation, false))<% end %>
+              |> with_undeleted(relation)<% end %>
               |> ids_filter(ids_map)
 
             key =
@@ -168,8 +172,6 @@ defmodule <%= model_plugin_module %> do
               |> Repo.all
               |> Enum.map(&Map.drop(&1, [:__struct__]))
             end)
-          else
-            []
           end
 
 
