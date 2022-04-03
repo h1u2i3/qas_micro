@@ -6,6 +6,6 @@ defmodule QasMicro.Util.Unit do
   end
 
   defimpl String.Chars, for: __MODULE__ do
-    def to_string(%{content: content}), do: Macro.to_string(content)
+    def to_string(%{content: content}), do: inspect(content, limit: :infinity)
   end
 end
