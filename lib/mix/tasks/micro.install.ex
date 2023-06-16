@@ -1,8 +1,6 @@
 defmodule Mix.Tasks.Micro.Install do
   use Mix.Task
 
-  import QasMicro.Util.Sigil
-
   alias QasMicro.Pipeline
 
   alias QasMicro.Middleware.Config.{

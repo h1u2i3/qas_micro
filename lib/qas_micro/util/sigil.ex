@@ -56,7 +56,9 @@ defmodule QasMicro.Util.Sigil do
           {sigil, context, args} when sigil in [:sigil_i, :sigil_w, :sigil_f, :sigil_a] ->
             {
               sigil,
-              context |> Keyword.put(:context, Elixir) |> Keyword.put(:import, __MODULE__),
+              context
+              |> Keyword.put(:context, __MODULE__)
+              |> Keyword.put(:imports, [{2, __MODULE__}]),
               args
             }
             |> Code.eval_quoted()
